@@ -5,9 +5,13 @@ export function TablaPartidas() {
   const partidas = misPartidas;
   const [arrayPartidas, setArrayPartidas] = useState(misPartidas);
 
+  const [ordenAscendente, setOrdenAscendente] = useState(false);
+
   function ordenarPartidas() {
     const partidasOrdenadas = [...arrayPartidas].sort((a, b) => {
-      return ordenAscendente ? a.puntos - b.puntos : b.puntos - a.puntos;
+      return ordenAscendente
+        ? a.puntuacion - b.puntuacion
+        : b.puntuacion - a.puntuacion;
     });
     setArrayPartidas(partidasOrdenadas);
     setOrdenAscendente(!ordenAscendente);
@@ -37,13 +41,22 @@ export function TablaPartidas() {
           <tr>
             <th></th>
             <th>
-              Nick <i className="bi bi-arrow-up-square"></i>
+              Nick{" "}
+              <button onClick={ordenarPartidas} className="btn btn-dark">
+                <i className="bi bi-arrow-up-square"></i>
+              </button>
             </th>
             <th>
-              Puntuación <i className="bi bi-arrow-up-square"></i>
+              Puntuación{" "}
+              <button onClick={ordenarPartidas} className="btn btn-dark">
+                <i className="bi bi-arrow-up-square"></i>
+              </button>
             </th>
             <th>
-              Fecha <i className="bi bi-arrow-up-square"></i>
+              Fecha{" "}
+              <button onClick={ordenarPartidas} className="btn btn-dark">
+                <i className="bi bi-arrow-up-square"></i>
+              </button>
             </th>
           </tr>
         </thead>
