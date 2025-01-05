@@ -98,7 +98,6 @@ export function TablaPartidas() {
         </tbody>
         <tfoot></tfoot>
       </table>
-
       {/* Modal para agregar nueva partida */}
       {modalVisible && (
         <div
