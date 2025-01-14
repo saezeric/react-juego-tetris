@@ -4,11 +4,13 @@ import "./styles/bootstrap.scss";
 import "./styles/custom.scss";
 import { TablaPartidas } from "./Components/TablaPartidas";
 import { Header } from "./Components/Header";
+import { Inicio } from "./Components/Inicio";
 
 export default function App() {
   return (
     <>
       <Header />
+      <Inicio />
       <TablaPartidas />
     </>
   );
