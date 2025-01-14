@@ -65,7 +65,6 @@ export function TablaPartidas() {
         >
           Agregar Partida
         </button>
-
         <div className="input-group mb-3">
           <input
             type="text"
