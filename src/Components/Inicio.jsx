@@ -19,7 +19,9 @@ export function Inicio() {
             Al final de la partida podràs desar la teva puntuació, i verue el
             ranking de jugadors
           </p>
-          <button className="btn btn-success fs-1 mt-5">JUGAR</button>
+          <a href="juego" className="btn btn-success fs-1 mt-5">
+            JUGAR
+          </a>
         </div>
       </section>
     </>
