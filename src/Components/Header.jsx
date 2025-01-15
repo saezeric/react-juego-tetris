@@ -31,7 +31,7 @@ export function Header() {
       </nav>
       <div className="mt-5 pt-5">
         <img
-          src="../../public/img/logo.png"
+          src="/logo.png"
           alt="logo"
           width="200"
           className="d-block mx-auto"
