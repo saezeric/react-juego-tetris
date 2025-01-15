@@ -1,12 +1,14 @@
 export function Header() {
   return (
-    <header className="d-flex align-items-center justify-content-center">
-      <img
-        src="../../public/img/logo.png"
-        alt="logo"
-        width="200"
-        className="mt-5"
-      />
+    <header className="d-flex flex-column align-items-center justify-content-center">
+      <div className="mt-5 pt-5">
+        <img
+          src="../../public/img/logo.png"
+          alt="logo"
+          width="200"
+          className="d-block mx-auto"
+        />
+      </div>
     </header>
   );
 }
