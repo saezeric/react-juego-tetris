@@ -1,8 +1,8 @@
+import React from "react";
 import { useState } from "react";
 import misPartidas from "../partidas.json";
 
 export function TablaPartidas() {
-  const partidas = misPartidas;
   const [arrayPartidas, setArrayPartidas] = useState(misPartidas);
   const [ordenAscendente, setOrdenAscendente] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);

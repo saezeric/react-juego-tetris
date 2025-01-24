@@ -1,3 +1,5 @@
+import React from "react";
+
 export function Header() {
   return (
     <header className="d-flex flex-column align-items-center justify-content-center">
