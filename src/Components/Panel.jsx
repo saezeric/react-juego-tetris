@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import { colorPieza } from "../lib/colores";
+import { modeloPieza } from "../lib/modeloPieza";
 
 export const Panel = ({ modelo }) => {
   return (
@@ -10,7 +11,6 @@ export const Panel = ({ modelo }) => {
           {fila.map((celda, indexColumna) => {
             // Llama a colorPieza con el número de la celda
             const claseColor = colorPieza({ numero: celda });
-            // console.log(claseColor);
             return (
               <div
                 key={indexColumna}

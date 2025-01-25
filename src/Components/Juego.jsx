@@ -6,15 +6,20 @@ import { useState } from "react";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
+
   return (
     <>
-      <Pieza modelo={modelos.piezas[0].matriz[0]} />
-      <Pieza modelo={modelos.piezas[1].matriz[0]} />
-      <Pieza modelo={modelos.piezas[2].matriz[0]} />
-      <Pieza modelo={modelos.piezas[3].matriz[0]} />
-      <Pieza modelo={modelos.piezas[4].matriz[0]} />
-      <Pieza modelo={modelos.piezas[5].matriz[0]} />
-      <Pieza modelo={modelos.piezas[6].matriz[0]} />
+      {modelos.piezas.map((pieza, index) =>
+        pieza.matriz.map((fila, indexFila) => (
+          // Llamamos a la clase Pieza para obtener nuestras piezas y sus angulos
+          <Pieza
+            key={`${index}-${indexFila}`} // Identificacion unica para cada pieza, es importante para diferenciarlas
+            numero={index} // Es el numero que hace referencia a nuestra pieza, a este le sumaremos +2 en modeloPieza.js
+            nombre={pieza.nombre} // Es el nombre que hace referencia a nuestra pieza
+            angulo={indexFila} // Puedes cambiar esto según sea necesario
+          />
+        ))
+      )}
       <Panel modelo={arrayCasillas} />
     </>
   );
