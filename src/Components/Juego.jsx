@@ -12,6 +12,9 @@ export function Juego() {
       <Pieza modelo={modelos.piezas[1].matriz[0]} />
       <Pieza modelo={modelos.piezas[2].matriz[0]} />
       <Pieza modelo={modelos.piezas[3].matriz[0]} />
+      <Pieza modelo={modelos.piezas[4].matriz[0]} />
+      <Pieza modelo={modelos.piezas[5].matriz[0]} />
+      <Pieza modelo={modelos.piezas[6].matriz[0]} />
       <Panel modelo={arrayCasillas} />
     </>
   );
