@@ -2,7 +2,7 @@ import { modelos } from "./modelos";
 
 export class modeloPieza {
   constructor({ numero, nombre, angulo }) {
-    this.numero = numero + 2;
+    this.numero = numero;
     this.nombre = nombre;
     this.angulo = angulo;
     this.fila = 0;
@@ -18,21 +18,21 @@ export class modeloPieza {
     }
   }
 
-  girar() {
+  girar(angulo) {
     // Si existe la pieza y existe el angulo de dicha pieza se hace lo siguiente
     if (
       modelos.piezas[this.numero] &&
-      modelos.piezas[this.numero].matriz[this.angulo + 1]
+      modelos.piezas[this.numero].matriz[angulo + 1]
     ) {
       // Aumentamos el angulo de la pieza
-      this.angulo++;
+      angulo++;
       // Devolvemos la pieza concreta con su angulo
-      return modelos.piezas[this.numero].matriz[this.angulo];
+      return modelos.piezas[this.numero].matriz[angulo];
     } else {
       // Si no existe el angulo, volvemos a la posicion inicial
-      this.angulo = 0;
+      angulo = 0;
       // Devolvemos la pieza concreta con su angulo
-      return modelos.piezas[this.numero].matriz[this.angulo];
+      return modelos.piezas[this.numero].matriz[angulo];
     }
   }
 }

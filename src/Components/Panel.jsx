@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 import React from "react";
 import { colorPieza } from "../lib/colores";
-import { modeloPieza } from "../lib/modeloPieza";
 
 export const Panel = ({ modelo }) => {
   return (

@@ -147,7 +147,7 @@ export const modelos = {
     },
 
     {
-      nombre: "0",
+      nombre: "O",
       matriz: [
         [
           [7, 7],
