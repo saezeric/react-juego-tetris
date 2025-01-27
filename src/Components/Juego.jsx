@@ -1,361 +1,101 @@
+import React from "react";
+import { Panel } from "./Panel";
+import { modelos } from "../lib/modelos";
+import { useState } from "react";
+import { nuevaPieza } from "../lib/nuevaPieza";
+
 export function Juego() {
+  const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
+  const [piezaActual, setPiezaActual] = useState([]);
+
+  const insertaNuevaPieza = () => {
+    const pActual = nuevaPieza();
+    setPiezaActual([...piezaActual, pActual]);
+    pintarPieza(pActual);
+  };
+
+  const pintarPieza = (pActual) => {
+    const nuevaMatriz = [...arrayCasillas];
+
+    pActual.matriz.map((fila, indexFila) => {
+      fila.map((celda, indexColumna) => {
+        if (
+          arrayCasillas[pActual.fila + indexFila][
+            pActual.columna + indexColumna
+          ] === 1
+        ) {
+          // Hacer que la pieza aparezca dentro del panel si esta se sobrepone sobre el borde 1
+          if (
+            arrayCasillas[pActual.fila + indexFila][
+              pActual.columna + indexColumna
+            ] <= 1
+          ) {
+            // Si la pieza se sobrepone sobre el borde 1, hacemos que la pieza entre dentro del panel
+            pActual.columna = 1;
+            nuevaMatriz[pActual.fila + indexFila][
+              pActual.columna + indexColumna
+            ] = celda;
+          }
+          // Hacer que la pieza aparezca dentro del panel si esta se sobrepone sobre el borde 11
+          if (
+            arrayCasillas[pActual.fila + indexFila][
+              pActual.columna + indexColumna
+            ] >= 10
+          ) {
+            nuevaMatriz[pActual.fila + indexFila][
+              pActual.columna - indexColumna
+            ] = celda;
+          }
+        }
+        console.log(pActual.columna, indexColumna);
+      });
+    });
+
+    pActual.matriz.map((fila, indexFila) => {
+      fila.map((celda, indexColumna) => {
+        if (celda !== 0) {
+          nuevaMatriz[pActual.fila + indexFila][
+            pActual.columna + indexColumna
+          ] = celda;
+        }
+      });
+    });
+    setArrayCasillas(nuevaMatriz);
+  };
+
   return (
     <>
-      <section>
-        <div id="juego" className="d-none">
-          <div className="row">
-            <div className="col-4 d-flex flex-column justify-content-end align-items-center p-5">
-              <h4>
-                Nivel: <span>2</span>
-              </h4>
-              <h4>
-                Tiempo: <span>5:22</span>
-              </h4>
-              <h4>
-                Lineas: <span>2</span>
-              </h4>
-              <h4>
-                Puntos: <span>211122</span>
-              </h4>
-            </div>
-            <div className="col-4 d-flex justify-content-center">
-              <div id="panel" className="p-5">
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-                <div className="fila d-flex justify-content-center">
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                  <div className="celda bg-dark border-secondary">x</div>
-                </div>
-              </div>
-            </div>
-            <div className="col-4 d-flex flex-column justify-content-start align-items-center p-5">
-              <div id="piezaSiguiente">
-                <h4>Pieza siguiente:</h4>
-                <div className="piezaSiguiente m-2">
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-dark border-secondary">x</div>
-                  </div>
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-dark border-secondary">x</div>
-                  </div>
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                  </div>
-                </div>
-                <div className="piezaSiguiente m-2">
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-dark border-secondary">x</div>
-                  </div>
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-dark border-secondary">x</div>
-                  </div>
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                  </div>
-                </div>
-                <div className="piezaSiguiente m-2">
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-dark border-secondary">x</div>
-                  </div>
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-dark border-secondary">x</div>
-                  </div>
-                  <div className="fila d-flex justify-content-center">
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                    <div className="celda bg-primary bg-gradient border-dark">
-                      x
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <hr />
-              <div id="piezaGuardada">
-                <h4>Pieza guardada:</h4>
-                <div className="piezaGuardada">
-                  <div className="piezaSiguiente m-2">
-                    <div className="fila d-flex justify-content-center">
-                      <div className="celda bg-warning bg-gradient border-dark">
-                        x
-                      </div>
-                      <div className="celda bg-warning border-secondary">x</div>
-                    </div>
-                    <div className="fila d-flex justify-content-center">
-                      <div className="celda bg-warning bg-gradient border-dark">
-                        x
-                      </div>
-                      <div className="celda bg-warning border-secondary">x</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Codigo para mostrar todas y cada una de las piezas */}
+      {/* {modelos.piezas.map((pieza, index) =>
+        pieza.matriz.map((fila, indexFila) => (
+          // Llamamos a la clase Pieza para obtener nuestras piezas y sus angulos
+          <Pieza
+            key={`${index}-${indexFila}`} // Identificacion unica para cada pieza, es importante para diferenciarlas
+            numero={index} // Es el numero que hace referencia a nuestra pieza, a este le sumaremos +2 en modeloPieza.js
+            nombre={pieza.nombre} // Es el nombre que hace referencia a nuestra pieza
+            angulo={indexFila} // Puedes cambiar esto según sea necesario
+          />
+        ))
+      )} */}
+
+      {/* Codigo que muestra la pieza actual por pantalla fuera del panel */}
+      {/* {piezaActual.map((p, index) => (
+        <Pieza
+          key={index}
+          numero={p.numero}
+          nombre={p.nombre}
+          angulo={p.angulo}
+        />
+      ))} */}
+
+      <div className="container text-center bg-opacity-50 bg-dark text-dark my-5">
+        <button className="container p-3 my-2" onClick={insertaNuevaPieza}>
+          Agregar Pieza
+        </button>
+      </div>
+
+      {/* Panel de juego de nuestro tetris */}
+      <Panel modelo={arrayCasillas} />
     </>
   );
 }
