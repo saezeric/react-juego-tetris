@@ -1,9 +1,17 @@
 import { modelos } from "./modelos.js";
 import { modeloPieza } from "./modeloPieza.js";
 
+// Funcion que crea una pieza completamente aleatoria y usa la clase modeloPieza para crearse
 export function nuevaPieza() {
+  // Numero aleatorio para poder variar entre piezas de forma aleatoria
   const numero = Math.floor(Math.random() * modelos.piezas.length);
   const nombre = modelos.piezas[numero].nombre;
-  const angulo = 0;
-  return new modeloPieza({ numero, nombre, angulo });
+  // Cambiamos el angulo de forma random para cada pieza como en el juego original
+  const angulo = Math.floor(
+    Math.random() * modelos.piezas[numero].matriz.length
+  );
+  const fila = 0;
+  const columna =
+    Math.floor(Math.random() * (modelos.matriz[fila].length - 3)) + 1;
+  return new modeloPieza({ numero, nombre, angulo, fila, columna });
 }

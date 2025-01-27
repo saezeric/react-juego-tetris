@@ -1,18 +1,66 @@
-/* eslint-disable no-unused-vars */
 import React from "react";
 import { Panel } from "./Panel";
-import { Pieza } from "./Pieza";
 import { modelos } from "../lib/modelos";
 import { useState } from "react";
 import { nuevaPieza } from "../lib/nuevaPieza";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
-  const [piezas, setPiezas] = useState([]);
+  const [piezaActual, setPiezaActual] = useState([]);
 
-  const agregarPieza = () => {
-    const pieza = nuevaPieza();
-    setPiezas([...piezas, pieza]);
+  const insertaNuevaPieza = () => {
+    const pActual = nuevaPieza();
+    setPiezaActual([...piezaActual, pActual]);
+    pintarPieza(pActual);
+  };
+
+  const pintarPieza = (pActual) => {
+    const nuevaMatriz = [...arrayCasillas];
+
+    pActual.matriz.map((fila, indexFila) => {
+      fila.map((celda, indexColumna) => {
+        if (
+          arrayCasillas[pActual.fila + indexFila][
+            pActual.columna + indexColumna
+          ] === 1
+        ) {
+          // Hacer que la pieza aparezca dentro del panel si esta se sobrepone sobre el borde 1
+          if (
+            arrayCasillas[pActual.fila + indexFila][
+              pActual.columna + indexColumna
+            ] <= 1
+          ) {
+            // Si la pieza se sobrepone sobre el borde 1, hacemos que la pieza entre dentro del panel
+            pActual.columna = 1;
+            nuevaMatriz[pActual.fila + indexFila][
+              pActual.columna + indexColumna
+            ] = celda;
+          }
+          // Hacer que la pieza aparezca dentro del panel si esta se sobrepone sobre el borde 11
+          if (
+            arrayCasillas[pActual.fila + indexFila][
+              pActual.columna + indexColumna
+            ] >= 10
+          ) {
+            nuevaMatriz[pActual.fila + indexFila][
+              pActual.columna - indexColumna
+            ] = celda;
+          }
+        }
+        console.log(pActual.columna, indexColumna);
+      });
+    });
+
+    pActual.matriz.map((fila, indexFila) => {
+      fila.map((celda, indexColumna) => {
+        if (celda !== 0) {
+          nuevaMatriz[pActual.fila + indexFila][
+            pActual.columna + indexColumna
+          ] = celda;
+        }
+      });
+    });
+    setArrayCasillas(nuevaMatriz);
   };
 
   return (
@@ -30,15 +78,21 @@ export function Juego() {
         ))
       )} */}
 
-      <button onClick={agregarPieza}>Agregar Pieza</button>
-      {piezas.map((pieza, index) => (
+      {/* Codigo que muestra la pieza actual por pantalla fuera del panel */}
+      {/* {piezaActual.map((p, index) => (
         <Pieza
           key={index}
-          numero={pieza.numero}
-          nombre={pieza.nombre}
-          angulo={pieza.angulo}
+          numero={p.numero}
+          nombre={p.nombre}
+          angulo={p.angulo}
         />
-      ))}
+      ))} */}
+
+      <div className="container text-center bg-opacity-50 bg-dark text-dark my-5">
+        <button className="container p-3 my-2" onClick={insertaNuevaPieza}>
+          Agregar Pieza
+        </button>
+      </div>
 
       {/* Panel de juego de nuestro tetris */}
       <Panel modelo={arrayCasillas} />
