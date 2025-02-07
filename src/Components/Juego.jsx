@@ -1,56 +1,73 @@
 import React from "react";
 import { Panel } from "./Panel";
 import { modelos } from "../lib/modelos";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { nuevaPieza } from "../lib/nuevaPieza";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
   const [piezaActual, setPiezaActual] = useState([]);
 
-  const insertaNuevaPieza = () => {
+  // Realizar un movimiento cada vez que se escucha el evento arrowDown o boton flecha hacia abajo
+  useEffect(() => {
+    // L'efecte a executar
+    function controlTeclas(event) {
+      if (event.key === "ArrowUp") {
+        girar(event);
+      }
+      if (event.key === "ArrowDown") {
+        bajar(event);
+      }
+      if (event.key === "ArrowRight") {
+        moverDra(event);
+      }
+      if (event.key === "ArrowLeft") {
+        moverIzq(event);
+      }
+    }
+    console.log("Se esta ejecutando el useEffect");
+    window.addEventListener("keydown", controlTeclas);
+
+    return () => {
+      // Cleanup (opcional)
+      window.removeEventListener("keydown", controlTeclas);
+    };
+  }, []);
+
+  // ####################################################
+  //          Funciones para mover las piezas
+  // ####################################################
+
+  function moverDra(e) {
+    console.log("Has pulsado la tecla derecha", e.key);
+  }
+
+  function moverIzq(e) {
+    console.log("Has pulsado la tecla izquierda", e.key);
+  }
+
+  function bajar(e) {
+    console.log("Has pulsado la tecla bajar", e.key);
+  }
+
+  function girar(e) {
+    console.log("Has pulsado la tecla arriba", e.key);
+  }
+
+  function insertaNuevaPieza() {
     const pActual = nuevaPieza();
     setPiezaActual([...piezaActual, pActual]);
     pintarPieza(pActual);
-  };
+  }
 
   const pintarPieza = (pActual) => {
     const nuevaMatriz = [...arrayCasillas];
 
-    pActual.matriz.map((fila, indexFila) => {
-      fila.map((celda, indexColumna) => {
-        if (
-          arrayCasillas[pActual.fila + indexFila][
-            pActual.columna + indexColumna
-          ] === 1
-        ) {
-          // Hacer que la pieza aparezca dentro del panel si esta se sobrepone sobre el borde 1
-          if (
-            arrayCasillas[pActual.fila + indexFila][
-              pActual.columna + indexColumna
-            ] <= 1
-          ) {
-            // Si la pieza se sobrepone sobre el borde 1, hacemos que la pieza entre dentro del panel
-            pActual.columna = 1;
-            nuevaMatriz[pActual.fila + indexFila][
-              pActual.columna + indexColumna
-            ] = celda;
-          }
-          // Hacer que la pieza aparezca dentro del panel si esta se sobrepone sobre el borde 11
-          if (
-            arrayCasillas[pActual.fila + indexFila][
-              pActual.columna + indexColumna
-            ] >= 10
-          ) {
-            nuevaMatriz[pActual.fila + indexFila][
-              pActual.columna - indexColumna
-            ] = celda;
-          }
-        }
-        console.log(pActual.columna, indexColumna);
-      });
-    });
+    // ###################################################################################
+    // Imprimimos la matriz de nuestra ficha dentro del panel
+    // ###################################################################################
 
+    console.log(pActual.columna);
     pActual.matriz.map((fila, indexFila) => {
       fila.map((celda, indexColumna) => {
         if (celda !== 0) {
@@ -65,6 +82,12 @@ export function Juego() {
 
   return (
     <>
+      {/*#######################################################
+
+      Codigo para mostrar todas las piezas de nuestro array
+
+      #########################################################*/}
+
       {/* Codigo para mostrar todas y cada una de las piezas */}
       {/* {modelos.piezas.map((pieza, index) =>
         pieza.matriz.map((fila, indexFila) => (
@@ -87,6 +110,10 @@ export function Juego() {
           angulo={p.angulo}
         />
       ))} */}
+
+      {/* #######################################################
+      Codigo para mostrar nuestro Panel de juego
+      ######################################################### */}
 
       <div className="container text-center bg-opacity-50 bg-dark text-dark my-5">
         <button className="container p-3 my-2" onClick={insertaNuevaPieza}>

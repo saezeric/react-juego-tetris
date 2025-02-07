@@ -11,7 +11,8 @@ export function nuevaPieza() {
     Math.random() * modelos.piezas[numero].matriz.length
   );
   const fila = 0;
-  const columna =
-    Math.floor(Math.random() * (modelos.matriz[fila].length - 3)) + 1;
+  const columna = Math.floor(
+    Math.random() * (11 - modelos.piezas[numero].matriz[angulo][0].length) + 1
+  );
   return new modeloPieza({ numero, nombre, angulo, fila, columna });
 }

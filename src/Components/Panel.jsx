@@ -14,9 +14,7 @@ export const Panel = ({ modelo }) => {
               <div
                 key={indexColumna}
                 className={`celda border border-dark p-2 ${claseColor}`}
-              >
-                {celda}
-              </div>
+              ></div>
             );
           })}
         </div>
