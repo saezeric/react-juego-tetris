@@ -7,6 +7,7 @@ import { nuevaPieza } from "../lib/nuevaPieza";
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
   const [piezaActual, setPiezaActual] = useState(nuevaPieza());
+  let temporizador;
 
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
@@ -63,6 +64,7 @@ export function Juego() {
     return () => {
       // Cleanup (opcional)
       window.removeEventListener("keydown", controlTeclas);
+      temporizador = setInterval(bajar, 2000);
     };
   }, []);
 
