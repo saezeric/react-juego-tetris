@@ -29,13 +29,14 @@ export class modeloPieza {
     ) {
       // Aumentamos el angulo de la pieza
       this.angulo++;
+      console.log(modelos.piezas[this.numero].matriz[this.angulo]);
       // Devolvemos la pieza concreta con su angulo
-      return modelos.piezas[this.numero].matriz[this.angulo];
+      this.matriz = modelos.piezas[this.numero].matriz[this.angulo];
     } else {
       // Si no existe el angulo, volvemos a la posicion inicial
       this.angulo = 0;
       // Devolvemos la pieza concreta con su angulo
-      return modelos.piezas[this.numero].matriz[this.angulo];
+      this.matriz = modelos.piezas[this.numero].matriz[this.angulo];
     }
   }
 }

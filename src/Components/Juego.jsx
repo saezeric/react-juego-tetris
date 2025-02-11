@@ -13,28 +13,27 @@ export function Juego() {
   // ####################################################
 
   function insertaNuevaPieza() {
-    const pActual = nuevaPieza();
-    setPiezaActual(pActual);
-    pintarPieza(pActual);
+    setPiezaActual(nuevaPieza());
   }
 
   // #############################################################
   //    Imprimimos la matriz de nuestra ficha dentro del panel
   // #############################################################
 
-  const pintarPieza = (pActual) => {
+  const pintarPieza = (piezaActual) => {
     const nuevaMatriz = [...arrayCasillas];
 
-    // console.log(pActual.columna);
-    pActual.matriz.map((fila, indexFila) => {
-      fila.map((celda, indexColumna) => {
+    // console.log(piezaActual.columna);
+    piezaActual.matriz.forEach((fila, indexFila) => {
+      fila.forEach((celda, indexColumna) => {
         if (celda !== 0) {
-          nuevaMatriz[pActual.fila + indexFila][
-            pActual.columna + indexColumna
+          nuevaMatriz[piezaActual.fila + indexFila][
+            piezaActual.columna + indexColumna
           ] = celda;
         }
       });
     });
+    console.log("piezaActual.matriz:", piezaActual.matriz);
     setArrayCasillas(nuevaMatriz);
   };
 
@@ -46,16 +45,16 @@ export function Juego() {
     // L'efecte a executar
     function controlTeclas(event) {
       if (event.key === "ArrowUp") {
-        girar(event);
+        girar();
       }
       if (event.key === "ArrowDown") {
-        bajar(event);
+        bajar();
       }
       if (event.key === "ArrowRight") {
-        moverDra(event);
+        moverDra();
       }
       if (event.key === "ArrowLeft") {
-        moverIzq(event);
+        moverIzq();
       }
     }
     console.log("Se esta ejecutando el useEffect");
@@ -71,34 +70,25 @@ export function Juego() {
   //          Funciones para mover las piezas
   // ####################################################
 
-  function moverDra(e) {
-    console.log("Has pulsado la tecla derecha", e.key);
+  function moverDra() {
     piezaActual.columna++;
-    console.log(piezaActual.columna);
+    setPiezaActual({ ...piezaActual });
   }
 
-  function moverIzq(e) {
-    console.log("Has pulsado la tecla izquierda", e.key);
+  function moverIzq() {
     piezaActual.columna--;
-    console.log(piezaActual.columna);
+    setPiezaActual({ ...piezaActual });
   }
 
-  function bajar(e) {
-    console.log("Has pulsado la tecla bajar", e.key);
+  function bajar() {
     piezaActual.fila++;
     setPiezaActual({ ...piezaActual });
-    console.log(piezaActual.fila);
   }
 
-  function girar(e) {
-    console.log("Funcion Girar", e.key);
-    if (piezaActual.angulo == 3) {
-      piezaActual.angulo = 0;
-      console.log(piezaActual.angulo);
-    } else {
-      piezaActual.angulo++;
-      console.log(piezaActual.angulo);
-    }
+  function girar() {
+    piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
+    console.log(piezaActual);
+    setPiezaActual({ ...piezaActual });
   }
 
   useEffect(() => {
