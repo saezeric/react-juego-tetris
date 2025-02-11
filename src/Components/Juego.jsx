@@ -6,9 +6,42 @@ import { nuevaPieza } from "../lib/nuevaPieza";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
-  const [piezaActual, setPiezaActual] = useState([]);
+  const [piezaActual, setPiezaActual] = useState(nuevaPieza());
 
-  // Realizar un movimiento cada vez que se escucha el evento arrowDown o boton flecha hacia abajo
+  // ####################################################
+  //     Insertar nuevas piezas a traves de un boton
+  // ####################################################
+
+  function insertaNuevaPieza() {
+    const pActual = nuevaPieza();
+    setPiezaActual(pActual);
+    pintarPieza(pActual);
+  }
+
+  // #############################################################
+  //    Imprimimos la matriz de nuestra ficha dentro del panel
+  // #############################################################
+
+  const pintarPieza = (pActual) => {
+    const nuevaMatriz = [...arrayCasillas];
+
+    // console.log(pActual.columna);
+    pActual.matriz.map((fila, indexFila) => {
+      fila.map((celda, indexColumna) => {
+        if (celda !== 0) {
+          nuevaMatriz[pActual.fila + indexFila][
+            pActual.columna + indexColumna
+          ] = celda;
+        }
+      });
+    });
+    setArrayCasillas(nuevaMatriz);
+  };
+
+  // #########################################################
+  //  Realizar un movimiento cada vez que se clica una tecla
+  // #########################################################
+
   useEffect(() => {
     // L'efecte a executar
     function controlTeclas(event) {
@@ -40,45 +73,37 @@ export function Juego() {
 
   function moverDra(e) {
     console.log("Has pulsado la tecla derecha", e.key);
+    piezaActual.columna++;
+    console.log(piezaActual.columna);
   }
 
   function moverIzq(e) {
     console.log("Has pulsado la tecla izquierda", e.key);
+    piezaActual.columna--;
+    console.log(piezaActual.columna);
   }
 
   function bajar(e) {
     console.log("Has pulsado la tecla bajar", e.key);
+    piezaActual.fila++;
+    setPiezaActual({ ...piezaActual });
+    console.log(piezaActual.fila);
   }
 
   function girar(e) {
-    console.log("Has pulsado la tecla arriba", e.key);
+    console.log("Funcion Girar", e.key);
+    if (piezaActual.angulo == 3) {
+      piezaActual.angulo = 0;
+      console.log(piezaActual.angulo);
+    } else {
+      piezaActual.angulo++;
+      console.log(piezaActual.angulo);
+    }
   }
 
-  function insertaNuevaPieza() {
-    const pActual = nuevaPieza();
-    setPiezaActual([...piezaActual, pActual]);
-    pintarPieza(pActual);
-  }
-
-  const pintarPieza = (pActual) => {
-    const nuevaMatriz = [...arrayCasillas];
-
-    // ###################################################################################
-    // Imprimimos la matriz de nuestra ficha dentro del panel
-    // ###################################################################################
-
-    console.log(pActual.columna);
-    pActual.matriz.map((fila, indexFila) => {
-      fila.map((celda, indexColumna) => {
-        if (celda !== 0) {
-          nuevaMatriz[pActual.fila + indexFila][
-            pActual.columna + indexColumna
-          ] = celda;
-        }
-      });
-    });
-    setArrayCasillas(nuevaMatriz);
-  };
+  useEffect(() => {
+    pintarPieza(piezaActual);
+  }, [piezaActual]);
 
   return (
     <>

@@ -14,6 +14,7 @@ export const Panel = ({ modelo }) => {
               <div
                 key={indexColumna}
                 className={`celda border border-dark p-2 ${claseColor}`}
+                style={{ width: "25px", height: "25px" }}
               ></div>
             );
           })}
