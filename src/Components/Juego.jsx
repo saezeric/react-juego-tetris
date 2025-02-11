@@ -7,6 +7,9 @@ import { nuevaPieza } from "../lib/nuevaPieza";
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
   const [piezaActual, setPiezaActual] = useState(nuevaPieza());
+
+  // Temporizador para que la pieza baje automaticamente sola
+  // eslint-disable-next-line no-unused-vars
   let temporizador;
 
   // ####################################################
@@ -38,6 +41,29 @@ export function Juego() {
     setArrayCasillas(nuevaMatriz);
   };
 
+  // ##################################################################################
+  //    Si piezaActual se mueve o se gira, se elimina la estela que deja tras de si
+  // ##################################################################################
+
+  function borrarPieza(piezaActual) {
+    const nuevaMatriz = [...arrayCasillas]; // Copia de la matriz del tablero
+
+    // Recorremos la matriz de la pieza
+    piezaActual.matriz.forEach((fila, indexFila) => {
+      fila.forEach((celda, indexColumna) => {
+        if (celda !== 0) {
+          // Si la celda no es 0, la borramos de la matriz del tablero
+          nuevaMatriz[piezaActual.fila + indexFila][
+            piezaActual.columna + indexColumna
+          ] = 0; // 0 representa una celda vacía
+        }
+      });
+    });
+
+    // Actualizamos el estado del tablero
+    setArrayCasillas(nuevaMatriz);
+  }
+
   // #########################################################
   //  Realizar un movimiento cada vez que se clica una tecla
   // #########################################################
@@ -64,6 +90,7 @@ export function Juego() {
     return () => {
       // Cleanup (opcional)
       window.removeEventListener("keydown", controlTeclas);
+      // La pieza baja automaticamente cada dos segundos
       temporizador = setInterval(bajar, 2000);
     };
   }, []);
@@ -73,23 +100,26 @@ export function Juego() {
   // ####################################################
 
   function moverDra() {
+    borrarPieza(piezaActual);
     piezaActual.columna++;
     setPiezaActual({ ...piezaActual });
   }
 
   function moverIzq() {
+    borrarPieza(piezaActual);
     piezaActual.columna--;
     setPiezaActual({ ...piezaActual });
   }
 
   function bajar() {
+    borrarPieza(piezaActual);
     piezaActual.fila++;
     setPiezaActual({ ...piezaActual });
   }
 
   function girar() {
+    borrarPieza(piezaActual);
     piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
-    console.log(piezaActual);
     setPiezaActual({ ...piezaActual });
   }
 
