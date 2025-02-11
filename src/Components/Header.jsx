@@ -3,7 +3,7 @@ import React from "react";
 export function Header() {
   return (
     <header className="d-flex flex-column align-items-center justify-content-center">
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top w-100">
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
         <div className="container-fluid">
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav mx-auto">
@@ -31,11 +31,11 @@ export function Header() {
           </div>
         </div>
       </nav>
-      <div className="mt-5 pt-5">
+      <div>
         <img
           src="/logo.png"
           alt="logo"
-          width="200"
+          width="160"
           className="d-block mx-auto"
         />
       </div>
