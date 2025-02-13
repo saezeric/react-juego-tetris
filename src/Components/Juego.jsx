@@ -7,6 +7,7 @@ import { nuevaPieza } from "../lib/nuevaPieza";
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
   const [piezaActual, setPiezaActual] = useState(nuevaPieza());
+  let [puntuacion, setPuntuacion] = useState(0);
 
   // Temporizador para que la pieza baje automaticamente sola
   // eslint-disable-next-line no-unused-vars
@@ -64,6 +65,11 @@ export function Juego() {
     setArrayCasillas(nuevaMatriz);
   }
 
+  function piezaTocaSuelo(piezaActual) {
+    const suelo = arrayCasillas.length - 1; // Medimos el array y restamos uno para marcar como limite el suelo
+    return piezaActual.fila + piezaActual.matriz.length >= suelo; // devolvemos piezaActual siempre que no colisionemos con suelo
+  }
+
   // #########################################################
   //  Realizar un movimiento cada vez que se clica una tecla
   // #########################################################
@@ -88,10 +94,8 @@ export function Juego() {
     window.addEventListener("keydown", controlTeclas);
 
     return () => {
-      // Cleanup (opcional)
-      window.removeEventListener("keydown", controlTeclas);
-      // La pieza baja automaticamente cada dos segundos
-      temporizador = setInterval(bajar, 2000);
+      window.removeEventListener("keydown", controlTeclas); // Cleanup (opcional)
+      temporizador = setInterval(bajar, 2000); // La pieza baja automaticamente cada dos segundos
     };
   }, []);
 
@@ -100,35 +104,79 @@ export function Juego() {
   // ####################################################
 
   function moverDra() {
-    borrarPieza(piezaActual);
-    piezaActual.columna++;
-    setPiezaActual({ ...piezaActual });
+    borrarPieza(piezaActual); // borramos la estela de la pieza
+    piezaActual.columna++; // hacemos que la pieza se mueva a la derecha cada vez que pulsamos
+    setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
+    puntuacion += 10; // sumamos puntos por cada movimiento
+    setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
   }
 
   function moverIzq() {
-    borrarPieza(piezaActual);
-    piezaActual.columna--;
-    setPiezaActual({ ...piezaActual });
+    borrarPieza(piezaActual); // borramos la estela de la pieza
+    piezaActual.columna--; // hacemos que la pieza se mueva a la izquierda cada vez que pulsamos
+    setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
+    puntuacion += 10; // sumamos puntos por cada movimiento
+    setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
   }
 
   function bajar() {
-    borrarPieza(piezaActual);
-    piezaActual.fila++;
-    setPiezaActual({ ...piezaActual });
+    borrarPieza(piezaActual); // borramos la estela de la pieza
+    piezaActual.fila++; // hacemos que la pieza baje cada vez que pulsamos
+    setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
+    puntuacion += 10; // sumamos puntos por cada movimiento
+    setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
+    console.log(piezaTocaSuelo(piezaActual));
+
+    if (piezaTocaSuelo(piezaActual)) {
+      puntuacion += 50;
+      setPuntuacion(puntuacion);
+    }
   }
 
   function girar() {
-    borrarPieza(piezaActual);
+    borrarPieza(piezaActual); // borramos la estela de la pieza
     piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
-    setPiezaActual({ ...piezaActual });
+    setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
+    puntuacion += 20; // sumamos puntos por cada giro
+    setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
   }
 
   useEffect(() => {
-    pintarPieza(piezaActual);
+    pintarPieza(piezaActual); // pintamos pieza por cada vez que se mueve, baja o gira.
   }, [piezaActual]);
 
   return (
     <>
+      {/* ################################################################################# */}
+      {/*                   Mostramos la puntuacion de nuestra partida                      */}
+      {/* ################################################################################# */}
+
+      <div className="container text-center my-5">
+        <div className="bg-opacity-50 bg-dark text-light p-3">
+          {/* Mostramos la puntuacion por el div */}
+          <h3>Puntuación: {puntuacion}</h3>{" "}
+        </div>
+      </div>
+
+      {/* ################################################################################# */}
+      {/*                   Codigo para mostrar nuestro Panel de juego                      */}
+      {/* ################################################################################# */}
+
+      {/* Panel de juego de nuestro tetris */}
+      <Panel modelo={arrayCasillas} />
+
+      {/* ················································································· */}
+      {/* Codigo antiguo */}
+      {/* ················································································· */}
+
+      {/* Boton añadir partida  */}
+
+      {/* <div className="container text-center bg-opacity-50 bg-dark text-dark my-5">
+        <button className="container p-3 my-2" onClick={insertaNuevaPieza}>
+          Agregar Pieza
+        </button>
+      </div> */}
+
       {/*#######################################################
 
       Codigo para mostrar todas las piezas de nuestro array
@@ -157,19 +205,6 @@ export function Juego() {
           angulo={p.angulo}
         />
       ))} */}
-
-      {/* #######################################################
-      Codigo para mostrar nuestro Panel de juego
-      ######################################################### */}
-
-      <div className="container text-center bg-opacity-50 bg-dark text-dark my-5">
-        <button className="container p-3 my-2" onClick={insertaNuevaPieza}>
-          Agregar Pieza
-        </button>
-      </div>
-
-      {/* Panel de juego de nuestro tetris */}
-      <Panel modelo={arrayCasillas} />
     </>
   );
 }
