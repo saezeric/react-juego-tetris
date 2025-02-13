@@ -8,6 +8,7 @@ export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
   const [piezaActual, setPiezaActual] = useState(nuevaPieza());
   let [puntuacion, setPuntuacion] = useState(0);
+  let [pararPartida, setPararPartida] = useState(false);
 
   // Temporizador para que la pieza baje automaticamente sola
   // eslint-disable-next-line no-unused-vars
@@ -65,6 +66,10 @@ export function Juego() {
     setArrayCasillas(nuevaMatriz);
   }
 
+  // #########################################################
+  //  Detectar cuando la pieza toca el suelo
+  // #########################################################
+
   function piezaTocaSuelo(piezaActual) {
     const suelo = arrayCasillas.length - 1; // Medimos el array y restamos uno para marcar como limite el suelo
     return piezaActual.fila + piezaActual.matriz.length >= suelo; // devolvemos piezaActual siempre que no colisionemos con suelo
@@ -77,6 +82,9 @@ export function Juego() {
   useEffect(() => {
     // L'efecte a executar
     function controlTeclas(event) {
+      if (pararPartida == true) {
+        return;
+      }
       if (event.key === "ArrowUp") {
         girar();
       }
@@ -97,13 +105,16 @@ export function Juego() {
       window.removeEventListener("keydown", controlTeclas); // Cleanup (opcional)
       temporizador = setInterval(bajar, 2000); // La pieza baja automaticamente cada dos segundos
     };
-  }, []);
+  }, [pararPartida]);
 
   // ####################################################
   //          Funciones para mover las piezas
   // ####################################################
 
   function moverDra() {
+    if (pararPartida == true) {
+      return;
+    }
     borrarPieza(piezaActual); // borramos la estela de la pieza
     piezaActual.columna++; // hacemos que la pieza se mueva a la derecha cada vez que pulsamos
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
@@ -112,6 +123,9 @@ export function Juego() {
   }
 
   function moverIzq() {
+    if (pararPartida == true) {
+      return;
+    }
     borrarPieza(piezaActual); // borramos la estela de la pieza
     piezaActual.columna--; // hacemos que la pieza se mueva a la izquierda cada vez que pulsamos
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
@@ -120,6 +134,9 @@ export function Juego() {
   }
 
   function bajar() {
+    if (pararPartida == true) {
+      return;
+    }
     borrarPieza(piezaActual); // borramos la estela de la pieza
     piezaActual.fila++; // hacemos que la pieza baje cada vez que pulsamos
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
@@ -127,13 +144,20 @@ export function Juego() {
     setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
     console.log(piezaTocaSuelo(piezaActual));
 
+    // Si la pieza toca el suelo, realizamos las siguientes acciones
+
     if (piezaTocaSuelo(piezaActual)) {
-      puntuacion += 50;
-      setPuntuacion(puntuacion);
+      pararPartida = true; // Parar partida si la pieza toca el suelo
+      setPararPartida(pararPartida); // Seteamos el estado pararPartida
+      puntuacion += 50; // Si pieza toca el suelo sumamos 50 puntos
+      setPuntuacion(puntuacion); // Seteamos el estado puntuacion
     }
   }
 
   function girar() {
+    if (pararPartida == true) {
+      return;
+    }
     borrarPieza(piezaActual); // borramos la estela de la pieza
     piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
@@ -154,7 +178,10 @@ export function Juego() {
       <div className="container text-center my-5">
         <div className="bg-opacity-50 bg-dark text-light p-3">
           {/* Mostramos la puntuacion por el div */}
-          <h3>Puntuación: {puntuacion}</h3>{" "}
+          {pararPartida == true && (
+            <h2 className="text-success">PARTIDA FINALIZADA</h2>
+          )}
+          <h3>Puntuación: {puntuacion}</h3>
         </div>
       </div>
 
