@@ -13,6 +13,7 @@ export function TablaPartidas() {
     puntuacion: "",
     fecha: "",
   });
+  console.log(arrayPartidas);
 
   function ordenarNombre() {
     const nombresOrdenados = [...arrayPartidas].sort((a, b) => {

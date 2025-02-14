@@ -4,6 +4,7 @@ import { modelos } from "../lib/modelos";
 import { useState, useEffect, useContext } from "react";
 import { nuevaPieza } from "../lib/nuevaPieza";
 import UserContext from "../Contexts/UserContext";
+import { Navigate } from "react-router-dom";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz); // Estado que sirve para mostrar el panel de juego
@@ -11,6 +12,7 @@ export function Juego() {
   let [puntuacion, setPuntuacion] = useState(0); // Estado que define la puntuacion
   let [pararPartida, setPararPartida] = useState(false); // Estado que define si la partida ha de pararse o no
   const { arrayPartidas, setArrayPartidas } = useContext(UserContext); // Capturamos el arrayPartidas y el setArrayPartidas del UserContext
+  const [redirigir, setRedirigir] = useState(false); // Estado que si es true, nos redirige a la pagina de tabla partidas para que veamos dichas partidas.
 
   // Estados para el modal y para la nueva partida (usados en registraPartida)
   const [modalVisible, setModalVisible] = useState(false);
@@ -124,6 +126,7 @@ export function Juego() {
     // Reiniciamos el estado del modal
     setNuevaPartida({ nick: "", puntuacion: "", fecha: "" });
     setModalVisible(false);
+    setRedirigir(true); // Activa la redirección
     console.log("Nueva partida:", nuevaPartida);
     console.log("Nuestras partidas:", arrayPartidas);
   }
