@@ -225,6 +225,11 @@ export function Juego() {
     pintarPieza(piezaActual); // pintamos pieza por cada vez que se mueve, baja o gira.
   }, [piezaActual]);
 
+  // Si se activa la redirección, usamos Navigate para dirigir a "/partidas"
+  if (redirigir) {
+    return <Navigate to="/partidas" />;
+  }
+
   return (
     <>
       {/* ################################################################################# */}
