@@ -1,14 +1,24 @@
 import React from "react";
 import { Panel } from "./Panel";
 import { modelos } from "../lib/modelos";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { nuevaPieza } from "../lib/nuevaPieza";
+import UserContext from "../Contexts/UserContext";
 
 export function Juego() {
-  const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz);
-  const [piezaActual, setPiezaActual] = useState(nuevaPieza());
-  let [puntuacion, setPuntuacion] = useState(0);
-  let [pararPartida, setPararPartida] = useState(false);
+  const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz); // Estado que sirve para mostrar el panel de juego
+  const [piezaActual, setPiezaActual] = useState(nuevaPieza()); // Estado que instancia una nueva pieza
+  let [puntuacion, setPuntuacion] = useState(0); // Estado que define la puntuacion
+  let [pararPartida, setPararPartida] = useState(false); // Estado que define si la partida ha de pararse o no
+  const { arrayPartidas, setArrayPartidas } = useContext(UserContext); // Capturamos el arrayPartidas y el setArrayPartidas del UserContext
+
+  // Estados para el modal y para la nueva partida (usados en registraPartida)
+  const [modalVisible, setModalVisible] = useState(false);
+  const [nuevaPartida, setNuevaPartida] = useState({
+    nick: "",
+    puntuacion: "",
+    fecha: "",
+  });
 
   // Temporizador para que la pieza baje automaticamente sola
   // eslint-disable-next-line no-unused-vars
@@ -73,6 +83,49 @@ export function Juego() {
   function piezaTocaSuelo(piezaActual) {
     const suelo = arrayCasillas.length - 1; // Medimos el array y restamos uno para marcar como limite el suelo
     return piezaActual.fila + piezaActual.matriz.length >= suelo; // devolvemos piezaActual siempre que no colisionemos con suelo
+  }
+
+  // ##########################################################
+  //  Prepara la partida con la puntuación actual y la fecha,
+  //   y activa el modal para que el usuario ingrese el nick
+  // ##########################################################
+
+  function registraPartida() {
+    const fechaActual = new Date();
+    const anio = fechaActual.getFullYear();
+    const mes = ("0" + (fechaActual.getMonth() + 1)).slice(-2);
+    const dia = ("0" + fechaActual.getDate()).slice(-2);
+    const fechaFormateada = anio + "-" + mes + "-" + dia;
+
+    // Preparamos la nueva partida con la puntuación obtenida y la fecha actual.
+    // El campo "nick" se completará en el modal.
+    setNuevaPartida({
+      nick: "",
+      puntuacion: puntuacion,
+      fecha: fechaFormateada,
+    });
+    setModalVisible(true);
+  }
+
+  // ---------------------------------------------------
+  // Actualiza los campos del modal al escribir
+  // ---------------------------------------------------
+  function actualizarFormularioPartida(e) {
+    const { name, value } = e.target;
+    setNuevaPartida({ ...nuevaPartida, [name]: value });
+  }
+
+  // ---------------------------------------------------
+  // Guarda la partida: la agrega al array de partidas del contexto
+  // ---------------------------------------------------
+  function agregarPartida() {
+    // Agregamos la nueva partida al array global
+    setArrayPartidas([...arrayPartidas, nuevaPartida]);
+    // Reiniciamos el estado del modal
+    setNuevaPartida({ nick: "", puntuacion: "", fecha: "" });
+    setModalVisible(false);
+    console.log("Nueva partida:", nuevaPartida);
+    console.log("Nuestras partidas:", arrayPartidas);
   }
 
   // #########################################################
@@ -177,11 +230,17 @@ export function Juego() {
 
       <div className="container text-center my-5">
         <div className="bg-opacity-50 bg-dark text-light p-3">
-          {/* Mostramos la puntuacion por el div */}
-          {pararPartida == true && (
+          {pararPartida === true && (
             <h2 className="text-success">PARTIDA FINALIZADA</h2>
           )}
           <h3>Puntuación: {puntuacion}</h3>
+          {/* Al finalizar la partida se muestra el botón para guardar */}
+          {pararPartida === true && (
+            // Mostramos el boton del modal para guardar la partida
+            <button className="btn btn-primary" onClick={registraPartida}>
+              Guardar Partida
+            </button>
+          )}
         </div>
       </div>
 
@@ -192,46 +251,89 @@ export function Juego() {
       {/* Panel de juego de nuestro tetris */}
       <Panel modelo={arrayCasillas} />
 
-      {/* ················································································· */}
-      {/* Codigo antiguo */}
-      {/* ················································································· */}
-
-      {/* Boton añadir partida  */}
-
-      {/* <div className="container text-center bg-opacity-50 bg-dark text-dark my-5">
-        <button className="container p-3 my-2" onClick={insertaNuevaPieza}>
-          Agregar Pieza
-        </button>
-      </div> */}
-
-      {/*#######################################################
-
-      Codigo para mostrar todas las piezas de nuestro array
-
-      #########################################################*/}
-
-      {/* Codigo para mostrar todas y cada una de las piezas */}
-      {/* {modelos.piezas.map((pieza, index) =>
-        pieza.matriz.map((fila, indexFila) => (
-          // Llamamos a la clase Pieza para obtener nuestras piezas y sus angulos
-          <Pieza
-            key={`${index}-${indexFila}`} // Identificacion unica para cada pieza, es importante para diferenciarlas
-            numero={index} // Es el numero que hace referencia a nuestra pieza, a este le sumaremos +2 en modeloPieza.js
-            nombre={pieza.nombre} // Es el nombre que hace referencia a nuestra pieza
-            angulo={indexFila} // Puedes cambiar esto según sea necesario
-          />
-        ))
-      )} */}
-
-      {/* Codigo que muestra la pieza actual por pantalla fuera del panel */}
-      {/* {piezaActual.map((p, index) => (
-        <Pieza
-          key={index}
-          numero={p.numero}
-          nombre={p.nombre}
-          angulo={p.angulo}
-        />
-      ))} */}
+      {/* Modal para ingresar el nick y guardar la partida */}
+      {modalVisible && (
+        <div
+          className="modal fade show"
+          style={{ display: "block" }}
+          tabIndex="-1"
+          role="dialog"
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Agregar Nueva Partida</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setModalVisible(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="mb-3">
+                    <label htmlFor="nick" className="form-label">
+                      Nick
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="nick"
+                      name="nick"
+                      value={nuevaPartida.nick}
+                      onChange={actualizarFormularioPartida}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="puntuacion" className="form-label">
+                      Puntuación
+                    </label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="puntuacion"
+                      name="puntuacion"
+                      value={nuevaPartida.puntuacion}
+                      onChange={actualizarFormularioPartida}
+                      readOnly
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="fecha" className="form-label">
+                      Fecha
+                    </label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      id="fecha"
+                      name="fecha"
+                      value={nuevaPartida.fecha}
+                      onChange={actualizarFormularioPartida}
+                      readOnly
+                    />
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setModalVisible(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={agregarPartida}
+                >
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
