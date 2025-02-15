@@ -22,10 +22,6 @@ export function Juego() {
     fecha: "",
   });
 
-  // Temporizador para que la pieza baje automaticamente sola
-  // eslint-disable-next-line no-unused-vars
-  let temporizador;
-
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
   // ####################################################
@@ -159,8 +155,17 @@ export function Juego() {
 
     return () => {
       window.removeEventListener("keydown", controlTeclas); // Cleanup (opcional)
-      temporizador = setInterval(bajar, 2000); // La pieza baja automaticamente cada dos segundos
     };
+  }, [pararPartida]);
+
+  // Efecto para que baje la pieza automaticamente cada 2 segundos
+  useEffect(() => {
+    let temporizador = setInterval(() => {
+      if (!pararPartida) {
+        bajar();
+      }
+    }, 2000);
+    return () => clearInterval(temporizador);
   }, [pararPartida]);
 
   // ####################################################
