@@ -1,9 +1,11 @@
 import React from "react";
-import { useState } from "react";
-import misPartidas from "../partidas.json";
+import { useState, useContext } from "react";
+import UserContext from "../Contexts/UserContext";
+// import misPartidas from "../partidas.json";
 
 export function TablaPartidas() {
-  const [arrayPartidas, setArrayPartidas] = useState(misPartidas);
+  // const [arrayPartidas, setArrayPartidas] = useState(misPartidas);
+  const { arrayPartidas, setArrayPartidas } = useContext(UserContext);
   const [ordenAscendente, setOrdenAscendente] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [nuevaPartida, setNuevaPartida] = useState({
@@ -11,6 +13,7 @@ export function TablaPartidas() {
     puntuacion: "",
     fecha: "",
   });
+  console.log(arrayPartidas);
 
   function ordenarNombre() {
     const nombresOrdenados = [...arrayPartidas].sort((a, b) => {

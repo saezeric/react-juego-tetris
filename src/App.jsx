@@ -11,8 +11,8 @@ import { Ranking } from "./Components/Ranking";
 export default function App() {
   return (
     <>
-      <Header />
       <Router>
+        <Header />
         <Routes>
           <Route path="/" element={<Inicio />} />
           <Route path="partidas" element={<TablaPartidas />} />
