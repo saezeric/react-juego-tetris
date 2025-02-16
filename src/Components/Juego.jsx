@@ -13,7 +13,8 @@ export function Juego() {
   let [pararPartida, setPararPartida] = useState(false); // Estado que define si la partida ha de pararse o no
   const { arrayPartidas, setArrayPartidas } = useContext(UserContext); // Capturamos el arrayPartidas y el setArrayPartidas del UserContext
   const [redirigir, setRedirigir] = useState(false); // Estado que si es true, nos redirige a la pagina de tabla partidas para que veamos dichas partidas.
-
+  const [tablero, setTablero] = useState(modelos.matrizClonada); // Clon de arrayCasillas
+  let [colision, setColision] = useState(false);
   // Estados para el modal y para la nueva partida (usados en registraPartida)
   const [modalVisible, setModalVisible] = useState(false);
   const [nuevaPartida, setNuevaPartida] = useState({
@@ -22,16 +23,55 @@ export function Juego() {
     fecha: "",
   });
 
-  // Temporizador para que la pieza baje automaticamente sola
-  // eslint-disable-next-line no-unused-vars
-  let temporizador;
-
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
   // ####################################################
 
   function insertaNuevaPieza() {
+    const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
+    setTablero(nuevoTablero);
     setPiezaActual(nuevaPieza());
+    console.log(piezaActual);
+  }
+
+  // ####################################################
+  //     Deteccion de colisiones en el panel de juego
+  // ####################################################
+
+  function hayColision(piezaActual, tablero) {
+    const numFilas = tablero.length; // Almacenamos el numero de filas que tenemos
+    const numColumnas = tablero[0].length; // Almacenamos el numero de columnas que tenemos
+    const filaPosterior = piezaActual.fila + 1; // Simulamos que bajamos la pieza una unidad
+    const columnaD = piezaActual.columna + 1;
+    const columnaI = piezaActual.columna - 1;
+
+    for (let i = 0; i < piezaActual.matriz.length; i++) {
+      for (let j = 0; j < piezaActual.matriz[i].length; j++) {
+        if (piezaActual.matriz[i][j] !== 0) {
+          const fila = filaPosterior + i;
+          const columnaDerecha = columnaD + j;
+          const columnaIzquierda = columnaI + j;
+          // Si la celda se sale del límite inferior, hay colisión
+          if (fila >= numFilas) {
+            return true;
+          }
+          if (columnaIzquierda < 0) {
+            return true;
+          }
+          if (columnaDerecha >= numColumnas) {
+            return true;
+          }
+          if (
+            arrayCasillas[piezaActual.fila + i][piezaActual.columna + j] !==
+              0 &&
+            tablero[piezaActual.fila + i][piezaActual.columna + j] !== 0
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   // #############################################################
@@ -82,10 +122,10 @@ export function Juego() {
   //  Detectar cuando la pieza toca el suelo
   // #########################################################
 
-  function piezaTocaSuelo(piezaActual) {
-    const suelo = arrayCasillas.length - 1; // Medimos el array y restamos uno para marcar como limite el suelo
-    return piezaActual.fila + piezaActual.matriz.length >= suelo; // devolvemos piezaActual siempre que no colisionemos con suelo
-  }
+  // function piezaTocaSuelo(piezaActual) {
+  //   const suelo = arrayCasillas.length - 1; // Medimos el array y restamos uno para marcar como limite el suelo
+  //   return piezaActual.fila + piezaActual.matriz.length >= suelo; // devolvemos piezaActual siempre que no colisionemos con suelo
+  // }
 
   // ##########################################################
   //  Prepara la partida con la puntuación actual y la fecha,
@@ -138,9 +178,6 @@ export function Juego() {
   useEffect(() => {
     // L'efecte a executar
     function controlTeclas(event) {
-      if (pararPartida == true) {
-        return;
-      }
       if (event.key === "ArrowUp") {
         girar();
       }
@@ -159,16 +196,38 @@ export function Juego() {
 
     return () => {
       window.removeEventListener("keydown", controlTeclas); // Cleanup (opcional)
-      temporizador = setInterval(bajar, 2000); // La pieza baja automaticamente cada dos segundos
     };
-  }, [pararPartida]);
+  }, [colision]);
+
+  // Efecto para que baje la pieza automaticamente cada 2 segundos
+  useEffect(() => {
+    let temporizador = setInterval(() => {
+      if (!colision) {
+        bajar();
+      }
+    }, 2000);
+    return () => clearInterval(temporizador);
+  }, [colision]);
+
+  // Efecto que detecta colision
+
+  useEffect(() => {
+    if (colision === true) {
+      // Una vez fijada la pieza, se genera una nueva pieza jugable.
+      insertaNuevaPieza();
+      // Reiniciamos el flag de colisión.
+      setColision(false);
+    }
+  }, [colision]);
 
   // ####################################################
   //          Funciones para mover las piezas
   // ####################################################
 
   function moverDra() {
-    if (pararPartida == true) {
+    // Creamos una pieza candidata movida a la derecha
+    const pActual = { ...piezaActual, columna: piezaActual.columna + 1 };
+    if (hayColision(pActual, tablero) == true) {
       return;
     }
     borrarPieza(piezaActual); // borramos la estela de la pieza
@@ -179,9 +238,12 @@ export function Juego() {
   }
 
   function moverIzq() {
-    if (pararPartida == true) {
+    // Creamos una pieza candidata movida a la derecha
+    const pActual = { ...piezaActual, columna: piezaActual.columna - 1 };
+    if (hayColision(pActual, tablero) == true) {
       return;
     }
+
     borrarPieza(piezaActual); // borramos la estela de la pieza
     piezaActual.columna--; // hacemos que la pieza se mueva a la izquierda cada vez que pulsamos
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
@@ -190,7 +252,13 @@ export function Juego() {
   }
 
   function bajar() {
-    if (pararPartida == true) {
+    const pActual = { ...piezaActual, fila: piezaActual.fila + 1 };
+    // Si la pieza colisiona se suma puntuacion y se creara una nueva pieza
+    if (hayColision(pActual, tablero) == true) {
+      console.log("Colisión detectada: la pieza se fija en el tablero");
+      setColision(true);
+      puntuacion += 50; // Si pieza toca el suelo sumamos 50 puntos
+      setPuntuacion(puntuacion); // Seteamos el estado puntuacion
       return;
     }
     borrarPieza(piezaActual); // borramos la estela de la pieza
@@ -198,27 +266,66 @@ export function Juego() {
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
     puntuacion += 10; // sumamos puntos por cada movimiento
     setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
-    console.log(piezaTocaSuelo(piezaActual));
-
-    // Si la pieza toca el suelo, realizamos las siguientes acciones
-
-    if (piezaTocaSuelo(piezaActual)) {
-      pararPartida = true; // Parar partida si la pieza toca el suelo
-      setPararPartida(pararPartida); // Seteamos el estado pararPartida
-      puntuacion += 50; // Si pieza toca el suelo sumamos 50 puntos
-      setPuntuacion(puntuacion); // Seteamos el estado puntuacion
-    }
   }
 
   function girar() {
-    if (pararPartida == true) {
-      return;
-    }
     borrarPieza(piezaActual); // borramos la estela de la pieza
+    // Creamos una copia candidata de la pieza y le aplicamos la rotación
     piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
+    reubicarPiezaBajar(); // Evitar atravesar suelo al girar la ficha cerca del suelo
+    reubicarPiezaDerecha(); // Evitar atravesar el muro Derecho al girar la ficha
+    reubicarPiezaColision();
     setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
     puntuacion += 20; // sumamos puntos por cada giro
     setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
+  }
+
+  // Funcion para reubicar pieza cuando giramos, esto evita romper el panel por debajo
+  function reubicarPiezaBajar() {
+    // Comprobamos si la pieza, tras girar, se sale por el fondo del tablero
+    const numFilas = arrayCasillas.length - 1;
+    const alturaPieza = piezaActual.matriz.length;
+    const sueloPieza = piezaActual.fila + alturaPieza;
+    // Si la parte inferior de la pieza excede el tablero,
+    // calculamos cuántas filas se salen y ajustamos la posición vertical hacia arriba.
+    if (sueloPieza > numFilas) {
+      const piezaFinal = sueloPieza - numFilas;
+      piezaActual.fila = piezaActual.fila - piezaFinal;
+    }
+  }
+
+  function reubicarPiezaDerecha() {
+    const numColumnas = arrayCasillas[0].length - 1; // Número total de columnas del tablero
+    const anchoPieza = piezaActual.matriz[0].length; // Asumimos que el ancho de la pieza es la longitud de la primera fila de la matriz
+    // Si la parte derecha de la pieza se sale del tablero, ajustamos la columna
+    if (piezaActual.columna + anchoPieza > numColumnas) {
+      piezaActual.columna = numColumnas - anchoPieza;
+    }
+  }
+
+  function reubicarPiezaColision() {
+    // Si tras el giro hay colisión, intentamos recolocar la pieza
+    if (hayColision(piezaActual, arrayCasillas)) {
+      // 1) Subimos la pieza una fila
+      piezaActual.fila--;
+      // Si sigue habiendo colisión después de subirla, la regresamos a su posición
+      // y probamos moverla a la izquierda.
+      if (hayColision(piezaActual, arrayCasillas)) {
+        piezaActual.fila++;
+        piezaActual.columna--;
+        // Si sigue colisionando tras moverla a la izquierda,
+        // la devolvemos a su posición anterior y probamos a la derecha.
+        if (hayColision(piezaActual, arrayCasillas)) {
+          piezaActual.columna++;
+          piezaActual.columna++;
+          // Si tras moverla dos columnas a la derecha sigue colisionando,
+          // la regresamos y la dejamos como estaba (o podrías moverla arriba otra vez).
+          if (hayColision(piezaActual, arrayCasillas)) {
+            piezaActual.columna--;
+          }
+        }
+      }
+    }
   }
 
   useEffect(() => {
