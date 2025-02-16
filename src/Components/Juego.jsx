@@ -170,7 +170,6 @@ export function Juego() {
   // ####################################################
   //     Deteccion de colisiones en el panel de juego
   // ####################################################
-
   function hayColision(piezaActual, tablero) {
     const numFilas = tablero.length; // Almacenamos el numero de filas que tenemos
     const numColumnas = tablero[0].length; // Almacenamos el numero de columnas que tenemos
@@ -338,6 +337,7 @@ export function Juego() {
     };
   }, [colision, piezaActual]);
 
+  // Efecto para que baje la pieza automaticamente cada 2 segundos
   useEffect(() => {
     let temporizador;
     if (!colision && piezaActual) {
@@ -359,16 +359,6 @@ export function Juego() {
       setColision(false);
     }
   }, [colision]);
-
-  // Efecto para que baje la pieza automaticamente cada 2 segundos
-  useEffect(() => {
-    let temporizador = setInterval(() => {
-      if (!pararPartida) {
-        bajar();
-      }
-    }, 2000);
-    return () => clearInterval(temporizador);
-  }, [pararPartida]);
 
   // ####################################################
   //          Funciones para mover las piezas
