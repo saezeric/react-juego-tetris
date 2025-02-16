@@ -52,7 +52,6 @@ export function Juego() {
       setPiezaGuardada(temp);
     }
   }
-
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
   // ####################################################
@@ -359,6 +358,16 @@ export function Juego() {
       setColision(false);
     }
   }, [colision]);
+
+  // Efecto para que baje la pieza automaticamente cada 2 segundos
+  useEffect(() => {
+    let temporizador = setInterval(() => {
+      if (!pararPartida) {
+        bajar();
+      }
+    }, 2000);
+    return () => clearInterval(temporizador);
+  }, [pararPartida]);
 
   // ####################################################
   //          Funciones para mover las piezas
