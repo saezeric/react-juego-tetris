@@ -6,6 +6,7 @@ import { nuevaPieza } from "../lib/nuevaPieza";
 import UserContext from "../Contexts/UserContext";
 import { Navigate } from "react-router-dom";
 import { MiniMatriz } from "./MiniMatriz";
+import { modeloPieza } from "../lib/modeloPieza";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz); // Estado que sirve para mostrar el panel de juego
@@ -291,7 +292,7 @@ export function Juego() {
   // #########################################################
 
   useEffect(() => {
-    if (partidaTerminada == true) {
+    if (partidaTerminada == true || !piezaActual) {
       return;
     }
     // L'efecte a executar
@@ -347,7 +348,7 @@ export function Juego() {
   // ####################################################
 
   function moverDra() {
-    if (partidaTerminada == true) {
+    if (partidaTerminada == true || !piezaActual) {
       return;
     }
     // Creamos una pieza candidata movida a la derecha
@@ -363,7 +364,7 @@ export function Juego() {
   }
 
   function moverIzq() {
-    if (partidaTerminada == true) {
+    if (partidaTerminada == true || !piezaActual) {
       return;
     }
     // Creamos una pieza candidata movida a la derecha
@@ -405,19 +406,26 @@ export function Juego() {
       return;
     }
     borrarPieza(piezaActual); // borramos la estela de la pieza
+    const nuevaPiezaRotada = new modeloPieza({
+      numero: piezaActual.numero,
+      nombre: piezaActual.nombre,
+      angulo: piezaActual.angulo,
+      fila: piezaActual.fila,
+      columna: piezaActual.columna,
+    });
     // Creamos una copia candidata de la pieza y le aplicamos la rotación
     console.log("Pieza antes de girar:", piezaActual);
-    piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
-    reubicarPiezaBajar(); // Evitar atravesar suelo al girar la ficha cerca del suelo
-    reubicarPiezaDerecha(); // Evitar atravesar el muro Derecho al girar la ficha
-    reubicarPiezaColision();
-    setPiezaActual({ ...piezaActual }); // seteamos la pieza actual dentro del state pieza actual
+    nuevaPiezaRotada.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
+    reubicarPiezaBajar(nuevaPiezaRotada); // Evitar atravesar suelo al girar la ficha cerca del suelo
+    reubicarPiezaDerecha(nuevaPiezaRotada); // Evitar atravesar el muro Derecho al girar la ficha
+    reubicarPiezaColision(nuevaPiezaRotada);
+    setPiezaActual(nuevaPiezaRotada); // seteamos la pieza actual dentro del state pieza actual
     puntuacion += 20; // sumamos puntos por cada giro
     setPuntuacion(puntuacion); // seteamos la puntuacion actualizada
   }
 
   // Funcion para reubicar pieza cuando giramos, esto evita romper el panel por debajo
-  function reubicarPiezaBajar() {
+  function reubicarPiezaBajar(piezaActual) {
     // Comprobamos si la pieza, tras girar, se sale por el fondo del tablero
     const numFilas = arrayCasillas.length - 1;
     const alturaPieza = piezaActual.matriz.length;
@@ -430,7 +438,7 @@ export function Juego() {
     }
   }
 
-  function reubicarPiezaDerecha() {
+  function reubicarPiezaDerecha(piezaActual) {
     const numColumnas = arrayCasillas[0].length - 1; // Número total de columnas del tablero
     const anchoPieza = piezaActual.matriz[0].length; // Asumimos que el ancho de la pieza es la longitud de la primera fila de la matriz
     // Si la parte derecha de la pieza se sale del tablero, ajustamos la columna
@@ -439,7 +447,7 @@ export function Juego() {
     }
   }
 
-  function reubicarPiezaColision() {
+  function reubicarPiezaColision(piezaActual) {
     // Comprobamos si, tras el giro, existe colisión.
     if (!hayColision(piezaActual, arrayCasillas)) {
       return; // No hay colisión, salimos sin cambios
