@@ -28,21 +28,24 @@ export function Juego() {
   const [lineasEliminadas, setLineasEliminadas] = useState(0);
   const [piezaGuardada, setPiezaGuardada] = useState(null);
 
+  function reiniciarPosicion(pieza) {
+    pieza.fila = 0;
+    pieza.columna = Math.floor(
+      (arrayCasillas[0].length - pieza.matriz[0].length) / 2
+    );
+    return pieza;
+  }
+
   function guardarPieza() {
     if (!piezaGuardada) {
-      // 1) Borramos la pieza actual del tablero para que desaparezca
       borrarPieza(piezaActual);
-      // 2) Guardamos la pieza actual en piezaGuardada
-      setPiezaGuardada(piezaActual);
-      // 3) Asignamos la pieza siguiente como la nueva pieza jugable
+      setPiezaGuardada(reiniciarPosicion(piezaActual));
       setPiezaActual(piezaSiguiente);
-      // 4) Generamos una nueva pieza para que sea la nueva "piezaSiguiente"
       setPiezaSiguiente(nuevaPieza());
     } else {
-      // Si ya hay una pieza guardada, realizamos el intercambio (swap)
       borrarPieza(piezaActual);
-      const temp = piezaActual;
-      setPiezaActual(piezaGuardada);
+      const temp = reiniciarPosicion(piezaActual);
+      setPiezaActual(reiniciarPosicion(piezaGuardada));
       setPiezaGuardada(temp);
     }
   }
@@ -315,7 +318,7 @@ export function Juego() {
     return () => {
       window.removeEventListener("keydown", controlTeclas); // Cleanup (opcional)
     };
-  }, [colision]);
+  }, [colision, piezaActual]);
 
   useEffect(() => {
     let temporizador;
@@ -338,14 +341,6 @@ export function Juego() {
       setColision(false);
     }
   }, [colision]);
-
-  useEffect(() => {
-    if (piezaGuardada) {
-      // Limpiar cualquier rastro de la pieza guardada en el tablero
-      const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
-      setArrayCasillas(nuevoTablero);
-    }
-  }, [piezaGuardada]);
 
   // ####################################################
   //          Funciones para mover las piezas
@@ -406,11 +401,12 @@ export function Juego() {
   }
 
   function girar() {
-    if (partidaTerminada == true) {
+    if (partidaTerminada == true || !piezaActual) {
       return;
     }
     borrarPieza(piezaActual); // borramos la estela de la pieza
     // Creamos una copia candidata de la pieza y le aplicamos la rotación
+    console.log("Pieza antes de girar:", piezaActual);
     piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
     reubicarPiezaBajar(); // Evitar atravesar suelo al girar la ficha cerca del suelo
     reubicarPiezaDerecha(); // Evitar atravesar el muro Derecho al girar la ficha
