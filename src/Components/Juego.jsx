@@ -28,6 +28,8 @@ export function Juego() {
   });
   const [lineasEliminadas, setLineasEliminadas] = useState(0);
   const [piezaGuardada, setPiezaGuardada] = useState(null);
+  const [nivel, setNivel] = useState(1); // Estado para el nivel
+  const [velocidad, setVelocidad] = useState(2000); // Velocidad inicial (1 segundo)
 
   function reiniciarPosicion(pieza) {
     pieza.fila = 0;
@@ -59,7 +61,7 @@ export function Juego() {
     const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
     setTablero(nuevoTablero);
     const pieza = piezaSiguiente;
-    console.log("pieza:", pieza);
+    //console.log("pieza:", pieza);
     // Comprobamos si la nueva pieza colisiona inmediatamente
     // (usamos hayColision(pieza, arrayCasillas), por ejemplo)
     if (hayColision(pieza, arrayCasillas)) {
@@ -71,7 +73,7 @@ export function Juego() {
     }
     setPiezaActual(pieza);
     setPiezaSiguiente(nuevaPieza());
-    console.log("Nueva pieza actual:", piezaActual);
+    //console.log("Nueva pieza actual:", piezaActual);
   }
 
   // ####################################################
@@ -90,6 +92,7 @@ export function Juego() {
     }
 
     let lineasEliminadasEstaVez = 0;
+
     // Recorremos hasta la penúltima fila (ignoramos la última que actúa como "suelo")
     for (let i = 0; i < nuevoTablero.length - 1; i++) {
       // Verificamos si la fila está completa (todas las celdas != 0)
@@ -145,8 +148,24 @@ export function Juego() {
     // Si se han eliminado líneas, actualizamos el tablero y sumamos puntos
     if (lineasEliminadasEstaVez > 0) {
       setArrayCasillas(nuevoTablero);
-      setLineasEliminadas(lineasEliminadas + lineasEliminadasEstaVez);
-      setPuntuacion(puntuacion + lineasEliminadasEstaVez * 100);
+      setLineasEliminadas((prevLineas) => prevLineas + lineasEliminadasEstaVez);
+      setPuntuacion(
+        (prevPuntuacion) => prevPuntuacion + lineasEliminadasEstaVez * 100
+      );
+
+      // Verificar si se han eliminado 5 líneas para incrementar el nivel
+      if ((lineasEliminadas + lineasEliminadasEstaVez) % 5 === 0) {
+        setNivel((prevNivel) => prevNivel + 1);
+        setVelocidad((prevVelocidad) => {
+          const nuevaVelocidad = Math.max(200, prevVelocidad - 200); // Aumentar velocidad (mínimo 200ms)
+          console.log(
+            `Nivel aumentado a ${
+              nivel + 1
+            }. Nueva velocidad: ${nuevaVelocidad}ms`
+          ); // Verificar la velocidad
+          return nuevaVelocidad;
+        });
+      }
     }
   }
 
@@ -207,7 +226,7 @@ export function Juego() {
         }
       });
     });
-    console.log("piezaActual.matriz:", piezaActual.matriz);
+    //console.log("piezaActual.matriz:", piezaActual.matriz);
     setArrayCasillas(nuevaMatriz);
   };
 
@@ -324,13 +343,13 @@ export function Juego() {
   useEffect(() => {
     let temporizador;
     if (!colision && piezaActual) {
-      // Solo si hay una pieza actual activa
       temporizador = setInterval(() => {
         bajar();
-      }, 2000);
+        console.log(velocidad);
+      }, velocidad); // Usar la velocidad actual
     }
     return () => clearInterval(temporizador);
-  }, [colision, piezaActual]); // Dependencia añadida: piezaActual
+  }, [colision, piezaActual, velocidad]); // Añadir velocidad como dependencia
 
   // Efecto que detecta colision
 
@@ -535,6 +554,7 @@ export function Juego() {
           )}
           <h3>Puntuación: {puntuacion}</h3>
           <h3>Filas Eliminadas: {lineasEliminadas}</h3>
+          <h3>Nivel: {nivel}</h3>
 
           {/* Aquí mostramos la pieza siguiente */}
           <div className="panel-lateral">
