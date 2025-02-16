@@ -22,6 +22,7 @@ export function Juego() {
     puntuacion: "",
     fecha: "",
   });
+  const [lineasEliminadas, setLineasEliminadas] = useState(0);
 
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
@@ -32,6 +33,82 @@ export function Juego() {
     setTablero(nuevoTablero);
     setPiezaActual(nuevaPieza());
     console.log(piezaActual);
+  }
+
+  // ####################################################
+  //       Eliminar filas de piezas rellenadas
+  // ####################################################
+
+  function eliminarLineas() {
+    // Hacemos una copia de arrayCasillas
+    let nuevoTablero = [];
+    for (let f = 0; f < arrayCasillas.length; f++) {
+      let filaCopia = [];
+      for (let c = 0; c < arrayCasillas[f].length; c++) {
+        filaCopia[c] = arrayCasillas[f][c];
+      }
+      nuevoTablero.push(filaCopia);
+    }
+
+    let lineasEliminadasEstaVez = 0;
+    // Recorremos hasta la penúltima fila (ignoramos la última que actúa como "suelo")
+    for (let i = 0; i < nuevoTablero.length - 1; i++) {
+      // Verificamos si la fila está completa (todas las celdas != 0)
+      // pero ignorando la primera (col 0) y la última (col ...length - 1) columna
+      let filaCompleta = true;
+      const colLen = nuevoTablero[i].length;
+
+      // Comprobamos columnas 1..(colLen-2)
+      for (let j = 1; j < colLen - 1; j++) {
+        if (nuevoTablero[i][j] === 0) {
+          filaCompleta = false;
+          break;
+        }
+      }
+
+      if (filaCompleta) {
+        lineasEliminadasEstaVez++;
+
+        // 1) Creamos una fila vacía (pero dejamos la columna 0 y colLen-1 con su valor)
+        let filaVacia = [];
+        for (let x = 0; x < colLen; x++) {
+          // En col 0 y colLen-1 conservamos el valor que tuvieran,
+          // si quieres dejarlos a 0, cambia la lógica según lo necesites
+          if (x === 0 || x === colLen - 1) {
+            filaVacia[x] = nuevoTablero[i][x];
+          } else {
+            filaVacia[x] = 0;
+          }
+        }
+
+        // 2) Omitimos la fila i para "eliminarla" (estilo Tetris)
+        let tableroSinFila = [];
+        for (let r = 0; r < nuevoTablero.length; r++) {
+          if (r !== i) {
+            tableroSinFila.push(nuevoTablero[r]);
+          }
+        }
+
+        // 3) Añadimos la fila vacía al principio
+        let tableroConFilaNueva = [filaVacia];
+        for (let r = 0; r < tableroSinFila.length; r++) {
+          tableroConFilaNueva.push(tableroSinFila[r]);
+        }
+
+        // 4) Actualizamos nuevoTablero
+        nuevoTablero = tableroConFilaNueva;
+
+        // 5) Decrementamos i para volver a verificar la nueva fila
+        i--;
+      }
+    }
+
+    // Si se han eliminado líneas, actualizamos el tablero y sumamos puntos
+    if (lineasEliminadasEstaVez > 0) {
+      setArrayCasillas(nuevoTablero);
+      setLineasEliminadas(lineasEliminadas + lineasEliminadasEstaVez);
+      setPuntuacion(puntuacion + lineasEliminadasEstaVez * 100);
+    }
   }
 
   // ####################################################
@@ -259,6 +336,7 @@ export function Juego() {
       setColision(true);
       puntuacion += 50; // Si pieza toca el suelo sumamos 50 puntos
       setPuntuacion(puntuacion); // Seteamos el estado puntuacion
+      eliminarLineas();
       return;
     }
     borrarPieza(piezaActual); // borramos la estela de la pieza
@@ -304,28 +382,65 @@ export function Juego() {
   }
 
   function reubicarPiezaColision() {
-    // Si tras el giro hay colisión, intentamos recolocar la pieza
-    if (hayColision(piezaActual, arrayCasillas)) {
-      // 1) Subimos la pieza una fila
-      piezaActual.fila--;
-      // Si sigue habiendo colisión después de subirla, la regresamos a su posición
-      // y probamos moverla a la izquierda.
-      if (hayColision(piezaActual, arrayCasillas)) {
-        piezaActual.fila++;
-        piezaActual.columna--;
-        // Si sigue colisionando tras moverla a la izquierda,
-        // la devolvemos a su posición anterior y probamos a la derecha.
-        if (hayColision(piezaActual, arrayCasillas)) {
-          piezaActual.columna++;
-          piezaActual.columna++;
-          // Si tras moverla dos columnas a la derecha sigue colisionando,
-          // la regresamos y la dejamos como estaba (o podrías moverla arriba otra vez).
-          if (hayColision(piezaActual, arrayCasillas)) {
-            piezaActual.columna--;
-          }
-        }
-      }
+    // Comprobamos si, tras el giro, existe colisión.
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return; // No hay colisión, salimos sin cambios
     }
+
+    // 1) Subimos la pieza una fila
+    piezaActual.fila--;
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return; // Ajuste satisfactorio
+    }
+    // Revertimos
+    piezaActual.fila++;
+
+    // 2) Subimos la pieza dos filas
+    piezaActual.fila -= 2;
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return; // Ajuste satisfactorio
+    }
+    // Revertimos
+    piezaActual.fila += 2;
+
+    // 3) Movemos la pieza una columna a la izquierda
+    piezaActual.columna--;
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return;
+    }
+    // Revertimos
+    piezaActual.columna++;
+
+    // 4) Movemos la pieza dos columnas a la izquierda
+    piezaActual.columna -= 2;
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return;
+    }
+    // Revertimos
+    piezaActual.columna += 2;
+
+    // 5) Movemos la pieza una columna a la derecha
+    piezaActual.columna++;
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return;
+    }
+    // Revertimos
+    piezaActual.columna--;
+
+    // 6) Movemos la pieza dos columnas a la derecha
+    piezaActual.columna += 2;
+    if (!hayColision(piezaActual, arrayCasillas)) {
+      return;
+    }
+    // Revertimos
+    piezaActual.columna -= 2;
+
+    // 7) Subir y desplazar (subir 1 y mover 1 izquierda, etc.) si aún quieres más casos.
+    // En tu caso, si la "J" sigue sin encontrar posición, puedes probar más combinaciones:
+    // Por ejemplo, sube 1 y mueve 1 izquierda, sube 1 y mueve 1 derecha, etc.
+
+    // Si todas las pruebas han fallado, la pieza se queda como estaba.
+    // No se hace nada, o podrías forzarla a un estado final (partida acabada).
   }
 
   useEffect(() => {
@@ -349,6 +464,7 @@ export function Juego() {
             <h2 className="text-success">PARTIDA FINALIZADA</h2>
           )}
           <h3>Puntuación: {puntuacion}</h3>
+          <h3>Filas Eliminadas: {lineasEliminadas}</h3>
           {/* Al finalizar la partida se muestra el botón para guardar */}
           {pararPartida === true && (
             // Mostramos el boton del modal para guardar la partida
