@@ -11,6 +11,7 @@ export function Juego() {
   const [piezaActual, setPiezaActual] = useState(nuevaPieza()); // Estado que instancia una nueva pieza
   let [puntuacion, setPuntuacion] = useState(0); // Estado que define la puntuacion
   let [pararPartida, setPararPartida] = useState(false); // Estado que define si la partida ha de pararse o no
+  const [partidaTerminada, setPartidaTerminada] = useState(false);
   const { arrayPartidas, setArrayPartidas } = useContext(UserContext); // Capturamos el arrayPartidas y el setArrayPartidas del UserContext
   const [redirigir, setRedirigir] = useState(false); // Estado que si es true, nos redirige a la pagina de tabla partidas para que veamos dichas partidas.
   const [tablero, setTablero] = useState(modelos.matrizClonada); // Clon de arrayCasillas
@@ -31,7 +32,17 @@ export function Juego() {
   function insertaNuevaPieza() {
     const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
     setTablero(nuevoTablero);
-    setPiezaActual(nuevaPieza());
+    const pieza = nuevaPieza();
+    // Comprobamos si la nueva pieza colisiona inmediatamente
+    // (usamos hayColision(pieza, arrayCasillas), por ejemplo)
+    if (hayColision(pieza, arrayCasillas)) {
+      // Si hay colisión, significa que no cabe. La partida acaba.
+      console.log("No cabe la nueva pieza. Partida terminada.");
+      setPararPartida(true); // Evita que se siga moviendo la pieza
+      setPartidaTerminada(true); // Indica que la partida finaliza
+      return;
+    }
+    setPiezaActual(pieza);
     console.log(piezaActual);
   }
 
@@ -253,6 +264,9 @@ export function Juego() {
   // #########################################################
 
   useEffect(() => {
+    if (partidaTerminada == true) {
+      return;
+    }
     // L'efecte a executar
     function controlTeclas(event) {
       if (event.key === "ArrowUp") {
@@ -302,6 +316,9 @@ export function Juego() {
   // ####################################################
 
   function moverDra() {
+    if (partidaTerminada == true) {
+      return;
+    }
     // Creamos una pieza candidata movida a la derecha
     const pActual = { ...piezaActual, columna: piezaActual.columna + 1 };
     if (hayColision(pActual, tablero) == true) {
@@ -315,6 +332,9 @@ export function Juego() {
   }
 
   function moverIzq() {
+    if (partidaTerminada == true) {
+      return;
+    }
     // Creamos una pieza candidata movida a la derecha
     const pActual = { ...piezaActual, columna: piezaActual.columna - 1 };
     if (hayColision(pActual, tablero) == true) {
@@ -329,6 +349,9 @@ export function Juego() {
   }
 
   function bajar() {
+    if (partidaTerminada == true) {
+      return;
+    }
     const pActual = { ...piezaActual, fila: piezaActual.fila + 1 };
     // Si la pieza colisiona se suma puntuacion y se creara una nueva pieza
     if (hayColision(pActual, tablero) == true) {
@@ -347,6 +370,9 @@ export function Juego() {
   }
 
   function girar() {
+    if (partidaTerminada == true) {
+      return;
+    }
     borrarPieza(piezaActual); // borramos la estela de la pieza
     // Creamos una copia candidata de la pieza y le aplicamos la rotación
     piezaActual.girar(); // Si pulso la tecla girar, llamo a la funcion girar de modeloPieza
@@ -460,8 +486,10 @@ export function Juego() {
 
       <div className="container text-center my-5">
         <div className="bg-opacity-50 bg-dark text-light p-3">
-          {pararPartida === true && (
-            <h2 className="text-success">PARTIDA FINALIZADA</h2>
+          {partidaTerminada && (
+            <h2 className="text-danger">
+              ¡PARTIDA FINALIZADA! No caben más piezas.
+            </h2>
           )}
           <h3>Puntuación: {puntuacion}</h3>
           <h3>Filas Eliminadas: {lineasEliminadas}</h3>
