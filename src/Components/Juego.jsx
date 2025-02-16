@@ -171,7 +171,6 @@ export function Juego() {
   // ####################################################
   //     Deteccion de colisiones en el panel de juego
   // ####################################################
-
   function hayColision(piezaActual, tablero) {
     const numFilas = tablero.length; // Almacenamos el numero de filas que tenemos
     const numColumnas = tablero[0].length; // Almacenamos el numero de columnas que tenemos
