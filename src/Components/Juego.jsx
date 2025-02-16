@@ -5,10 +5,12 @@ import { useState, useEffect, useContext } from "react";
 import { nuevaPieza } from "../lib/nuevaPieza";
 import UserContext from "../Contexts/UserContext";
 import { Navigate } from "react-router-dom";
+import { MiniMatriz } from "./MiniMatriz";
 
 export function Juego() {
   const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz); // Estado que sirve para mostrar el panel de juego
   const [piezaActual, setPiezaActual] = useState(nuevaPieza()); // Estado que instancia una nueva pieza
+  const [piezaSiguiente, setPiezaSiguiente] = useState(nuevaPieza()); // Estado que instanciara la siguiente pieza que utilizaremos
   let [puntuacion, setPuntuacion] = useState(0); // Estado que define la puntuacion
   let [pararPartida, setPararPartida] = useState(false); // Estado que define si la partida ha de pararse o no
   const [partidaTerminada, setPartidaTerminada] = useState(false);
@@ -32,7 +34,7 @@ export function Juego() {
   function insertaNuevaPieza() {
     const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
     setTablero(nuevoTablero);
-    const pieza = nuevaPieza();
+    const pieza = piezaSiguiente;
     // Comprobamos si la nueva pieza colisiona inmediatamente
     // (usamos hayColision(pieza, arrayCasillas), por ejemplo)
     if (hayColision(pieza, arrayCasillas)) {
@@ -43,6 +45,7 @@ export function Juego() {
       return;
     }
     setPiezaActual(pieza);
+    setPiezaSiguiente(nuevaPieza());
     console.log(piezaActual);
   }
 
@@ -493,6 +496,11 @@ export function Juego() {
           )}
           <h3>Puntuación: {puntuacion}</h3>
           <h3>Filas Eliminadas: {lineasEliminadas}</h3>
+          {/* Aquí mostramos la pieza siguiente */}
+          <div className="panel-lateral">
+            <h3>Siguiente Pieza</h3>
+            <MiniMatriz matriz={piezaSiguiente.matriz} />
+          </div>
           {/* Al finalizar la partida se muestra el botón para guardar */}
           {pararPartida === true && (
             // Mostramos el boton del modal para guardar la partida
