@@ -26,6 +26,26 @@ export function Juego() {
     fecha: "",
   });
   const [lineasEliminadas, setLineasEliminadas] = useState(0);
+  const [piezaGuardada, setPiezaGuardada] = useState(null);
+
+  function guardarPieza() {
+    if (!piezaGuardada) {
+      // 1) Borramos la pieza actual del tablero para que desaparezca
+      borrarPieza(piezaActual);
+      // 2) Guardamos la pieza actual en piezaGuardada
+      setPiezaGuardada(piezaActual);
+      // 3) Asignamos la pieza siguiente como la nueva pieza jugable
+      setPiezaActual(piezaSiguiente);
+      // 4) Generamos una nueva pieza para que sea la nueva "piezaSiguiente"
+      setPiezaSiguiente(nuevaPieza());
+    } else {
+      // Si ya hay una pieza guardada, realizamos el intercambio (swap)
+      borrarPieza(piezaActual);
+      const temp = piezaActual;
+      setPiezaActual(piezaGuardada);
+      setPiezaGuardada(temp);
+    }
+  }
 
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
@@ -35,6 +55,7 @@ export function Juego() {
     const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
     setTablero(nuevoTablero);
     const pieza = piezaSiguiente;
+    console.log("pieza:", pieza);
     // Comprobamos si la nueva pieza colisiona inmediatamente
     // (usamos hayColision(pieza, arrayCasillas), por ejemplo)
     if (hayColision(pieza, arrayCasillas)) {
@@ -46,7 +67,7 @@ export function Juego() {
     }
     setPiezaActual(pieza);
     setPiezaSiguiente(nuevaPieza());
-    console.log(piezaActual);
+    console.log("Nueva pieza actual:", piezaActual);
   }
 
   // ####################################################
@@ -284,6 +305,9 @@ export function Juego() {
       if (event.key === "ArrowLeft") {
         moverIzq();
       }
+      if (event.key.toLowerCase() === "g") {
+        guardarPieza(); // Llamamos a la función para guardar/intercambiar la pieza
+      }
     }
     console.log("Se esta ejecutando el useEffect");
     window.addEventListener("keydown", controlTeclas);
@@ -293,15 +317,16 @@ export function Juego() {
     };
   }, [colision]);
 
-  // Efecto para que baje la pieza automaticamente cada 2 segundos
   useEffect(() => {
-    let temporizador = setInterval(() => {
-      if (!colision) {
+    let temporizador;
+    if (!colision && piezaActual) {
+      // Solo si hay una pieza actual activa
+      temporizador = setInterval(() => {
         bajar();
-      }
-    }, 2000);
+      }, 2000);
+    }
     return () => clearInterval(temporizador);
-  }, [colision]);
+  }, [colision, piezaActual]); // Dependencia añadida: piezaActual
 
   // Efecto que detecta colision
 
@@ -313,6 +338,14 @@ export function Juego() {
       setColision(false);
     }
   }, [colision]);
+
+  useEffect(() => {
+    if (piezaGuardada) {
+      // Limpiar cualquier rastro de la pieza guardada en el tablero
+      const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
+      setArrayCasillas(nuevoTablero);
+    }
+  }, [piezaGuardada]);
 
   // ####################################################
   //          Funciones para mover las piezas
@@ -352,7 +385,7 @@ export function Juego() {
   }
 
   function bajar() {
-    if (partidaTerminada == true) {
+    if (partidaTerminada == true || !piezaActual) {
       return;
     }
     const pActual = { ...piezaActual, fila: piezaActual.fila + 1 };
@@ -473,7 +506,9 @@ export function Juego() {
   }
 
   useEffect(() => {
-    pintarPieza(piezaActual); // pintamos pieza por cada vez que se mueve, baja o gira.
+    if (piezaActual) {
+      pintarPieza(piezaActual); // Pintamos la pieza solo si existe
+    }
   }, [piezaActual]);
 
   // Si se activa la redirección, usamos Navigate para dirigir a "/partidas"
@@ -496,14 +531,28 @@ export function Juego() {
           )}
           <h3>Puntuación: {puntuacion}</h3>
           <h3>Filas Eliminadas: {lineasEliminadas}</h3>
+
           {/* Aquí mostramos la pieza siguiente */}
           <div className="panel-lateral">
             <h3>Siguiente Pieza</h3>
-            <MiniMatriz matriz={piezaSiguiente.matriz} />
+            {piezaSiguiente && <MiniMatriz matriz={piezaSiguiente.matriz} />}
           </div>
+
+          {/* Aquí mostramos la pieza guardada */}
+          <div className="panel-lateral mt-3">
+            <h3>Pieza Guardada</h3>
+            {piezaGuardada ? (
+              <MiniMatriz matriz={piezaGuardada.matriz} />
+            ) : (
+              <p>Ninguna pieza guardada</p>
+            )}
+            <p className="text-secondary">
+              Pulsa <strong>G</strong> para guardar/intercambiar la pieza actual
+            </p>
+          </div>
+
           {/* Al finalizar la partida se muestra el botón para guardar */}
           {pararPartida === true && (
-            // Mostramos el boton del modal para guardar la partida
             <button className="btn btn-primary" onClick={registraPartida}>
               Guardar Partida
             </button>
