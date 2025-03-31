@@ -14,155 +14,172 @@ export function Juego() {
   const [piezaSiguiente, setPiezaSiguiente] = useState(nuevaPieza()); // Estado que instanciara la siguiente pieza que utilizaremos
   let [puntuacion, setPuntuacion] = useState(0); // Estado que define la puntuacion
   let [pararPartida, setPararPartida] = useState(false); // Estado que define si la partida ha de pararse o no
-  const [partidaTerminada, setPartidaTerminada] = useState(false);
+  const [partidaTerminada, setPartidaTerminada] = useState(false); // Estado que setea el final de la partida cuando las piezas llegan al principio del panel
   const { arrayPartidas, setArrayPartidas } = useContext(UserContext); // Capturamos el arrayPartidas y el setArrayPartidas del UserContext
   const [redirigir, setRedirigir] = useState(false); // Estado que si es true, nos redirige a la pagina de tabla partidas para que veamos dichas partidas.
   const [tablero, setTablero] = useState(modelos.matrizClonada); // Clon de arrayCasillas
-  let [colision, setColision] = useState(false);
+  let [colision, setColision] = useState(false); // Estado que identifica si existe colision o no
   // Estados para el modal y para la nueva partida (usados en registraPartida)
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); // Estado que setea la visibilidad del modal
+  // Estado que facilita los campos vacios para nuestro modal, este permite guardar datos en TablaPartidas, concretamente una nueva partida
   const [nuevaPartida, setNuevaPartida] = useState({
     nick: "",
     puntuacion: "",
     fecha: "",
   });
-  const [lineasEliminadas, setLineasEliminadas] = useState(0);
-  const [piezaGuardada, setPiezaGuardada] = useState(null);
-  const [nivel, setNivel] = useState(1); // Estado para el nivel
-  const [velocidad, setVelocidad] = useState(2000); // Velocidad inicial (1 segundo)
+  const [lineasEliminadas, setLineasEliminadas] = useState(0); // Estado que elimina las lineas ya completadas dentro del panel de juego
+  const [piezaGuardada, setPiezaGuardada] = useState(null); // Estado que guarda una pieza cuando pulsamos un boton, concretamente la letra "G"
+  const [nivel, setNivel] = useState(1); // Estado para setear el nivel de la partida, el nivel incrementara por cada 5 lineas eliminadas
+  const [velocidad, setVelocidad] = useState(2000); // Estado que setea la velocidad de la pieza en partida, comenzaremos con 2 segundos
 
+  // Funcion que reinicia la posicion al inicio del panel para nuestra pieza cada vez que utilizamos la funcion guardar pieza.
   function reiniciarPosicion(pieza) {
-    pieza.fila = 0;
+    pieza.fila = 0; // Indicamos la fila donde queremos que aparezca la pieza
+    // Indicamos una columna aleatoria donde queremos que aparezca nuestra pieza
     pieza.columna = Math.floor(
       (arrayCasillas[0].length - pieza.matriz[0].length) / 2
-    );
-    return pieza;
+    ); // Se realiza un calculo en el cual se resta el ancho de array casillas por el ancho de nuestra pieza
+    return pieza; // Devolvemos pieza
   }
 
+  // Funcion que almacena una pieza cuando pulsamos un boton, concretamente la letra G
   function guardarPieza() {
+    // Condicional que verifica si pieza guardada existe o no
     if (!piezaGuardada) {
-      borrarPieza(piezaActual);
-      setPiezaGuardada(reiniciarPosicion(piezaActual));
-      setPiezaActual(piezaSiguiente);
-      setPiezaSiguiente(nuevaPieza());
+      borrarPieza(piezaActual); // Funcion que borrara todo rastro de nuestra pieza pintada por panel
+      setPiezaGuardada(reiniciarPosicion(piezaActual)); // Estado que setea la nueva pieza guardada con la posicion reiniciada
+      setPiezaActual(piezaSiguiente); // Estado que setea la nueva pieza actual con un estado llamado pieza siguiente
+      setPiezaSiguiente(nuevaPieza()); // Estado que setea la nueva pieza siguiente gracias a la funcion nuevaPieza
     } else {
-      borrarPieza(piezaActual);
-      const temp = reiniciarPosicion(piezaActual);
-      setPiezaActual(reiniciarPosicion(piezaGuardada));
-      setPiezaGuardada(temp);
+      borrarPieza(piezaActual); // Funcion que borrara todo rastro de nuestra pieza pintada por panel
+      const temp = reiniciarPosicion(piezaActual); // Variable que almacena temporalmente la pieza actual con la posicion reiniciada
+      setPiezaActual(reiniciarPosicion(piezaGuardada)); // Estado que setea la nueva pieza actual con un estado llamado pieza siguiente
+      setPiezaGuardada(temp); // Estado que setea la nueva pieza guardada gracias a la constante temporal que creamos antes
     }
   }
   // ####################################################
   //     Insertar nuevas piezas a traves de un boton
   // ####################################################
 
+  // Funcion que inserta una nueva pieza por pantalla cada vez que la anterior pieza colisiona
   function insertaNuevaPieza() {
-    const nuevoTablero = arrayCasillas.map((fila) => [...fila]);
-    setTablero(nuevoTablero);
-    const pieza = piezaSiguiente;
-    //console.log("pieza:", pieza);
-    // Comprobamos si la nueva pieza colisiona inmediatamente
-    // (usamos hayColision(pieza, arrayCasillas), por ejemplo)
+    const nuevoTablero = arrayCasillas.map((fila) => [...fila]); // Constante que clona todas las filas del tablero actual
+    setTablero(nuevoTablero); // Estado que setea un tablero completamente clonado
+    const pieza = piezaSiguiente; // Constante que almacena como pieza la pieza que aparecia como siguiente en nuestro juego
+    // Condiconal que comprueba si existe colision con nuestra ficha, en caso de existir una colision, detiene la partida por completo
     if (hayColision(pieza, arrayCasillas)) {
       // Si hay colisión, significa que no cabe. La partida acaba.
       console.log("No cabe la nueva pieza. Partida terminada.");
       setPararPartida(true); // Evita que se siga moviendo la pieza
       setPartidaTerminada(true); // Indica que la partida finaliza
-      return;
+      return; // Devuelve nada deteniendo cualquier evento
     }
-    setPiezaActual(pieza);
-    setPiezaSiguiente(nuevaPieza());
-    //console.log("Nueva pieza actual:", piezaActual);
+    setPiezaActual(pieza); // Estado que setea la pieza actual
+    setPiezaSiguiente(nuevaPieza()); // Estado que setea la siguiente pieza
   }
 
   // ####################################################
   //       Eliminar filas de piezas rellenadas
   // ####################################################
 
+  // Funcion que elimina las lineas que se han completado de nuestro tablero
   function eliminarLineas() {
     // Hacemos una copia de arrayCasillas
     let nuevoTablero = [];
+    // Bucle for que seteara todas las casillas de cada fila de mi tablero buscando tener el tablero completo copiado
     for (let f = 0; f < arrayCasillas.length; f++) {
+      // Variable que almacena la copia de todas las filas
       let filaCopia = [];
+      // Bucle for que se encarga de hacer push de todas las celdas dentro de nuestro array nuevoTablero
       for (let c = 0; c < arrayCasillas[f].length; c++) {
+        // Fila copia [c] sera igual a cada una de las casillas que se recorran de la fila de arrayCasillas
         filaCopia[c] = arrayCasillas[f][c];
       }
+      // Pusheamos todo a nuestro nuevo tablero
       nuevoTablero.push(filaCopia);
     }
 
+    // Variable que detecta cuantas lineas se han eliminado a la vez al accionar la funcion
     let lineasEliminadasEstaVez = 0;
 
     // Recorremos hasta la penúltima fila (ignoramos la última que actúa como "suelo")
     for (let i = 0; i < nuevoTablero.length - 1; i++) {
-      // Verificamos si la fila está completa (todas las celdas != 0)
-      // pero ignorando la primera (col 0) y la última (col ...length - 1) columna
-      let filaCompleta = true;
-      const colLen = nuevoTablero[i].length;
-
-      // Comprobamos columnas 1..(colLen-2)
+      let filaCompleta = true; // Variable que se alamcena como true para verificar si la fila esta completa
+      const colLen = nuevoTablero[i].length; // Constante que almacena la longitud del ancho del nuevo tablero
+      // For que comprueba cada fila y celda de nuestro tablero, para detectar si hay alguna fila completamente pintada
       for (let j = 1; j < colLen - 1; j++) {
+        // Condicional que verifica si la celda en la que nos encontramos es una celda vacia
         if (nuevoTablero[i][j] === 0) {
-          filaCompleta = false;
+          filaCompleta = false; // Si la celda esta vacia, se almacena en filaCompleta un valor falso y se para el bucle por completo
           break;
         }
       }
 
+      // Condicional que se acciona si fila completa es true
       if (filaCompleta) {
-        lineasEliminadasEstaVez++;
+        // Contador que suma cuantas lineas se han eliminado esta vez
+        lineasEliminadasEstaVez++; // Inicialmente eliminamos una fila ya que se ha cumplido la condicion de fila completa
 
-        // 1) Creamos una fila vacía (pero dejamos la columna 0 y colLen-1 con su valor)
-        let filaVacia = [];
+        let filaVacia = []; // Creamos una fila vacia que utilizaremos para añadir arriba del todo del array
+        // Bucle for que busca copiar una fila vacia de nuestra celda por completo
         for (let x = 0; x < colLen; x++) {
-          // En col 0 y colLen-1 conservamos el valor que tuvieran,
-          // si quieres dejarlos a 0, cambia la lógica según lo necesites
+          // Condicional que copiara tanto las celdas de nuestro muro como las celdas vacias
           if (x === 0 || x === colLen - 1) {
-            filaVacia[x] = nuevoTablero[i][x];
+            filaVacia[x] = nuevoTablero[i][x]; // Condicional que copia una celda de nuestro muro
           } else {
-            filaVacia[x] = 0;
+            filaVacia[x] = 0; // Condicional que copia una celda vacia
           }
         }
 
-        // 2) Omitimos la fila i para "eliminarla" (estilo Tetris)
+        // Creamos una variable para eliminar la fila pintada
         let tableroSinFila = [];
+        // Bucle for que pusheara celda por celda a un array para filas eliminadas
         for (let r = 0; r < nuevoTablero.length; r++) {
+          // Condicional que detecta en que fila hemos eliminado contenido
           if (r !== i) {
-            tableroSinFila.push(nuevoTablero[r]);
+            tableroSinFila.push(nuevoTablero[r]); // Pusheamos cada celda en la variable
           }
         }
 
-        // 3) Añadimos la fila vacía al principio
+        // Array que añade una nueva fila
         let tableroConFilaNueva = [filaVacia];
+        // Bucle for que recorre toda la fila y añade una nueva fila vacia
         for (let r = 0; r < tableroSinFila.length; r++) {
+          // Pusheamos celda por celda
           tableroConFilaNueva.push(tableroSinFila[r]);
         }
 
-        // 4) Actualizamos nuevoTablero
+        // Actualizamos el tablero con nuevo tablero
         nuevoTablero = tableroConFilaNueva;
 
-        // 5) Decrementamos i para volver a verificar la nueva fila
+        // Hacemos un decremento de i para verificar otra nueva fila desde 0
         i--;
       }
     }
 
     // Si se han eliminado líneas, actualizamos el tablero y sumamos puntos
     if (lineasEliminadasEstaVez > 0) {
-      setArrayCasillas(nuevoTablero);
-      setLineasEliminadas((prevLineas) => prevLineas + lineasEliminadasEstaVez);
+      setArrayCasillas(nuevoTablero); // Seteamos el nuevo tablero en el array casillas
+      setLineasEliminadas((prevLineas) => prevLineas + lineasEliminadasEstaVez); // Sumamos a las lines previas las lineas que hemos eliminado
+      // Seteamos la nueva puntuacion
       setPuntuacion(
         (prevPuntuacion) => prevPuntuacion + lineasEliminadasEstaVez * 100
-      );
+      ); // Seteamos la nueva puntuacion sumandola con la putuacion previa y multiplicandola por 100
 
-      // Verificar si se han eliminado 5 líneas para incrementar el nivel
+      // Verificar si se han eliminado 5, 10, 15, 20... filas, la division dará 0 por lo que se incrementara el nivel
       if ((lineasEliminadas + lineasEliminadasEstaVez) % 5 === 0) {
-        setNivel((prevNivel) => prevNivel + 1);
+        setNivel((prevNivel) => prevNivel + 1); // Seteamos el nuevo nivel mas el nivel anterior
+        // Seteamos el nuevo estado de velocidad para nuestro juego
         setVelocidad((prevVelocidad) => {
+          // Constante que almacenara la nueva velocidad restandola con la velocidad que teniamos anteriromente menos 200milisegundos menos
           const nuevaVelocidad = Math.max(200, prevVelocidad - 200); // Aumentar velocidad (mínimo 200ms)
+          // Console.log que indica en que nivel estamos y a que velocidad vamos
           console.log(
             `Nivel aumentado a ${
               nivel + 1
             }. Nueva velocidad: ${nuevaVelocidad}ms`
           ); // Verificar la velocidad
-          return nuevaVelocidad;
+          return nuevaVelocidad; // Devolvemos la nueva velocidad
         });
       }
     }
@@ -174,56 +191,63 @@ export function Juego() {
     const numFilas = tablero.length; // Almacenamos el numero de filas que tenemos
     const numColumnas = tablero[0].length; // Almacenamos el numero de columnas que tenemos
     const filaPosterior = piezaActual.fila + 1; // Simulamos que bajamos la pieza una unidad
-    const columnaD = piezaActual.columna + 1;
-    const columnaI = piezaActual.columna - 1;
+    const columnaD = piezaActual.columna + 1; // Constante que simulara la columna de la derecha
+    const columnaI = piezaActual.columna - 1; // Constante que simulara la columna de la izquierda
 
+    // Bucle que detectara si existe colision con nuestra pieza en cualquiera de los muros o en el suelo
     for (let i = 0; i < piezaActual.matriz.length; i++) {
       for (let j = 0; j < piezaActual.matriz[i].length; j++) {
         if (piezaActual.matriz[i][j] !== 0) {
-          const fila = filaPosterior + i;
-          const columnaDerecha = columnaD + j;
-          const columnaIzquierda = columnaI + j;
+          // Esta constante detecta si al realizar un siguiente movimiento bajar, la pieza colisionara o no, en caso de hacerlo colisiona y se para
+          const fila = filaPosterior + i; // Constante que suma la simulacion de filaPosterior mas la altura de nuestra pieza
+          const columnaDerecha = columnaD + j; // Constante que suma la simulacion de nuestra columna derecha con el ancho de nuestra pieza
+          const columnaIzquierda = columnaI + j; // Constante que suma la simulacion de nuestra columna izquierda con el ancho de nuestra pieza
           // Si la celda se sale del límite inferior, hay colisión
           if (fila >= numFilas) {
-            return true;
+            return true; // Si la fila donde se encontraria pieza al bajar es la misma o mayor a la fila donde se encuentra el suelo, activamos la colision
           }
           if (columnaIzquierda < 0) {
-            return true;
+            return true; // Si la pieza toca la pared de la izquierda, se activa el evento de colision
           }
           if (columnaDerecha >= numColumnas) {
-            return true;
+            return true; // Si la pieza toca la pared de la derecha, se activa el evento de colision
           }
           if (
             arrayCasillas[piezaActual.fila + i][piezaActual.columna + j] !==
               0 &&
             tablero[piezaActual.fila + i][piezaActual.columna + j] !== 0
           ) {
-            return true;
+            return true; // Este condicional compara el tablero antiguo y el nuevo para no activar el evento colision al hacer aparecer una pieza por pantalla
           }
         }
       }
     }
-    return false;
+    return false; // Se devuelve false en caso de que no se detecte ninguna colision
   }
 
   // #############################################################
   //    Imprimimos la matriz de nuestra ficha dentro del panel
   // #############################################################
 
+  // Constante que pintara la nueva pieza por pantalla cada vez que se realice cualquier acción
   const pintarPieza = (piezaActual) => {
+    // constante que almacena la nueva matriz del panel y que actualizara el panel con la nueva pieza
     const nuevaMatriz = [...arrayCasillas];
 
     // console.log(piezaActual.columna);
+    // Recorremos la matriz de pieza actual y pintamos la nueva matriz en la zona que toca
     piezaActual.matriz.forEach((fila, indexFila) => {
       fila.forEach((celda, indexColumna) => {
+        // Condicional que pintara unicamente las celdas que tengan color de nuestra pieza
         if (celda !== 0) {
           nuevaMatriz[piezaActual.fila + indexFila][
             piezaActual.columna + indexColumna
-          ] = celda;
+          ] = celda; // Nuestra nueva matriz será igual a la celda pintada en la que nos encontremos
         }
       });
     });
     //console.log("piezaActual.matriz:", piezaActual.matriz);
+    // Seteamos el tablero nuevo con la pieza pintada
     setArrayCasillas(nuevaMatriz);
   };
 
@@ -231,17 +255,20 @@ export function Juego() {
   //    Si piezaActual se mueve o se gira, se elimina la estela que deja tras de si
   // ##################################################################################
 
+  // Funcion que borra el rastro de nuestra pieza cuando esta se mueve, gira o es guardada
   function borrarPieza(piezaActual) {
-    const nuevaMatriz = [...arrayCasillas]; // Copia de la matriz del tablero
+    const nuevaMatriz = [...arrayCasillas]; // Copiamos la matriz del tablero
 
     // Recorremos la matriz de la pieza
     piezaActual.matriz.forEach((fila, indexFila) => {
+      // Recorremos cada fila de la pieza, celda por celda
       fila.forEach((celda, indexColumna) => {
+        // Si la celda no esta vacia daremos como valor a nuestra matriz una celda en blanco
         if (celda !== 0) {
-          // Si la celda no es 0, la borramos de la matriz del tablero
+          // La celda en la que nos encontramos sera igual a una celda vacia
           nuevaMatriz[piezaActual.fila + indexFila][
             piezaActual.columna + indexColumna
-          ] = 0; // 0 representa una celda vacía
+          ] = 0;
         }
       });
     });
@@ -254,6 +281,7 @@ export function Juego() {
   //  Detectar cuando la pieza toca el suelo
   // #########################################################
 
+  // Antigua funcion que detectaba si la pieza tocaba el suelo para mostrar un mensaje de se ha terminado la partida de forma temporal
   // function piezaTocaSuelo(piezaActual) {
   //   const suelo = arrayCasillas.length - 1; // Medimos el array y restamos uno para marcar como limite el suelo
   //   return piezaActual.fila + piezaActual.matriz.length >= suelo; // devolvemos piezaActual siempre que no colisionemos con suelo
@@ -264,10 +292,11 @@ export function Juego() {
   //   y activa el modal para que el usuario ingrese el nick
   // ##########################################################
 
+  // Funcion que registrara una nueva partida dentro de nuestro TablaPartidas a traves de nuestro panel de juego
   function registraPartida() {
-    const fechaActual = new Date();
-    const anio = fechaActual.getFullYear();
-    const mes = ("0" + (fechaActual.getMonth() + 1)).slice(-2);
+    const fechaActual = new Date(); // Constante que almacena la fecha actual de hoy
+    const anio = fechaActual.getFullYear(); // Constante que almacena el año en el que estamos
+    const mes = ("0" + (fechaActual.getMonth() + 1)).slice(-2); // Constante que almacena y concatena un 0 delante de nuestro numero de mes en caso de ser un mes de menos de dos digitos
     const dia = ("0" + fechaActual.getDate()).slice(-2);
     const fechaFormateada = anio + "-" + mes + "-" + dia;
 
@@ -313,17 +342,22 @@ export function Juego() {
     }
     // L'efecte a executar
     function controlTeclas(event) {
+      event.preventDefault();
       if (event.key === "ArrowUp") {
         girar();
+        event.preventDefault();
       }
       if (event.key === "ArrowDown") {
         bajar();
+        event.preventDefault();
       }
       if (event.key === "ArrowRight") {
         moverDra();
+        event.preventDefault();
       }
       if (event.key === "ArrowLeft") {
         moverIzq();
+        event.preventDefault();
       }
       if (event.key.toLowerCase() === "g") {
         guardarPieza(); // Llamamos a la función para guardar/intercambiar la pieza
